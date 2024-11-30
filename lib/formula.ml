@@ -25,3 +25,71 @@ let subst_bound_var term formula =
         Quant (quantifier, var_name, subst (ix + 1) body)
   in
   subst 0 formula
+
+let%test "abstract simple term" =
+  let term = Term.Var "x" in
+  let formula =
+    Pred
+      ( "P",
+        [ Term.Var "x"; Term.Function ("f", [ Term.Var "y"; Term.Var "x" ]) ] )
+  in
+  let expected =
+    Pred
+      ( "P",
+        [ Term.Bound 0; Term.Function ("f", [ Term.Var "y"; Term.Bound 0 ]) ] )
+  in
+  expected = abstract term formula
+
+let%test "abstract with nested formula" =
+  let term = Term.Var "x" in
+  let formula =
+    Conn
+      ( "&",
+        [
+          Pred ("P", [ Term.Var "x" ]);
+          Quant ("forall", "y", Pred ("Q", [ Term.Var "x" ]));
+        ] )
+  in
+  let expected =
+    Conn
+      ( "&",
+        [
+          Pred ("P", [ Term.Bound 0 ]);
+          Quant ("forall", "y", Pred ("Q", [ Term.Bound 1 ]));
+        ] )
+  in
+  expected = abstract term formula
+
+let%test "subst_bound_var simple term" =
+  let term = Term.Var "z" in
+  let formula =
+    Pred
+      ( "P",
+        [ Term.Bound 0; Term.Function ("f", [ Term.Var "y"; Term.Bound 0 ]) ] )
+  in
+  let expected =
+    Pred
+      ( "P",
+        [ Term.Var "z"; Term.Function ("f", [ Term.Var "y"; Term.Var "z" ]) ] )
+  in
+  expected = subst_bound_var term formula
+
+let%test "subst_bound_var with nested formula" =
+  let term = Term.Var "z" in
+  let formula =
+    Conn
+      ( "|",
+        [
+          Pred ("P", [ Term.Bound 0 ]);
+          Quant ("exists", "y", Pred ("Q", [ Term.Bound 1 ]));
+        ] )
+  in
+  let expected =
+    Conn
+      ( "|",
+        [
+          Pred ("P", [ Term.Var "z" ]);
+          Quant ("exists", "y", Pred ("Q", [ Term.Var "z" ]));
+        ] )
+  in
+  expected = subst_bound_var term formula
