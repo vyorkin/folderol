@@ -8,7 +8,7 @@ type t =
 [@@deriving eq, show]
 
 val replace : t * t -> t -> t
-(** traverses the given term recursively
+(** Traverses the given term recursively
     and replaces all occurrences of [old_term] with [new_term]. 
 
     @param old_term The term to be replaced.

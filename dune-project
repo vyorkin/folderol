@@ -1,26 +1,16 @@
 (lang dune 3.16)
+(using menhir 2.0)
 
 (name folderol)
-
 (generate_opam_files true)
-
 (source
- (github username/reponame))
-
-(authors "Author Name")
-
-(maintainers "Maintainer Name")
-
-(license LICENSE)
-
-(documentation https://url/to/documentation)
+ (github vyorkin/folderol))
+(authors "Vasiliy Yorkin")
+(maintainers "Vasiliy Yorkin <vasiliy.yorkin@gmail.com>")
+(license MIT)
 
 (package
  (name folderol)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml dune)
- (tags
-  (topics "to describe" your project)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
+ (synopsis "My little theorem prover")
+ (description "Toy theorem prover based on the Designing a Theorem Prover paper by Lawrence C. Paulson.")
+ (depends ocaml dune))
