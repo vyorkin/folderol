@@ -2,7 +2,7 @@
 opam-version: "2.0"
 synopsis: "My little theorem prover"
 description:
-  "My little theorem prover. Based on the Designing a Theorem Prover  paper by Lawrence C. Paulson."
+  "Toy theorem prover based on the Designing a Theorem Prover paper by Lawrence C. Paulson."
 maintainer: ["Vasiliy Yorkin <vasiliy.yorkin@gmail.com>"]
 authors: ["Vasiliy Yorkin"]
 license: "MIT"
