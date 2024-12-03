@@ -26,6 +26,14 @@ let rec pp_term fmt = function
           Format.close_box ())
         args
 
+let term_to_string term =
+  let open Format in
+  let buffer = Buffer.create 16 in
+  let fmt = formatter_of_buffer buffer in
+  pp_term fmt term;
+  pp_print_flush fmt ();
+  Buffer.contents buffer
+
 let rec replace (old_term, new_term) term =
   if term = old_term then new_term
   else
@@ -60,18 +68,9 @@ let%test "replace works with deeply nested functions" =
   in
   result = expected
 
-(* Pretty-print helper function *)
-let pp_term_to_string term =
-  let open Format in
-  let buffer = Buffer.create 16 in
-  let fmt = formatter_of_buffer buffer in
-  pp_term fmt term;
-  pp_print_flush fmt ();
-  Buffer.contents buffer
-
 (* Custom assertion for tests *)
 let test_pp_term ~expected term =
-  let actual = pp_term_to_string term in
+  let actual = term_to_string term in
   if actual <> expected then
     failwith (Printf.sprintf "Expected: %s\nActual: %s" expected actual)
 

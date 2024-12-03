@@ -50,11 +50,22 @@ let rec pp_formula fmt = function
       else Format.fprintf fmt "(%a)" (fun fmt body -> pp_formula fmt body) body;
       Format.close_box ()
 
+(* formats a negation of a formula *)
 and pp_not fmt subformula =
   pp_connective fmt Not;
   Format.open_box 0;
   pp_formula fmt subformula;
   Format.close_box ()
+
+let formula_to_string formula =
+  let open Format in
+  let buffer = Buffer.create 16 in
+  let fmt = formatter_of_buffer buffer in
+  pp_open_hvbox fmt 0;
+  pp_formula fmt formula;
+  pp_close_box fmt ();
+  pp_print_flush fmt ();
+  Buffer.contents buffer
 
 let abstract term formula =
   let rec abs ix = function
@@ -144,19 +155,8 @@ let%test "subst_bound_var with nested formula" =
   in
   expected = subst_bound_var term formula
 
-(* Pretty-print helper function *)
-let pp_formula_to_string formula =
-  let open Format in
-  let buffer = Buffer.create 16 in
-  let fmt = formatter_of_buffer buffer in
-  pp_open_hvbox fmt 0;
-  pp_formula fmt formula;
-  pp_close_box fmt ();
-  pp_print_flush fmt ();
-  Buffer.contents buffer
-
 let test_pp_formula expected formula =
-  let actual = pp_formula_to_string formula in
+  let actual = formula_to_string formula in
   if actual <> expected then
     failwith (Printf.sprintf "Expected: %s\nActual: %s" expected actual)
 

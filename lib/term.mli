@@ -7,6 +7,7 @@ type t =
   | Function of string * t list  (** Function application. *)
 [@@deriving eq, show]
 
+val pp_term : Format.formatter -> t -> unit
 (** 
   Prints the term [t] using the format output function [fmt].
 
@@ -22,7 +23,14 @@ type t =
   @param fmt The formatter to which the formatted term is output.
   @param t The term to be formatted.
 *)
-val pp_term: Format.formatter -> t -> unit
+
+val term_to_string : t -> string
+(** 
+  Prints a term.
+
+  @param term The term to convert to a string.
+  @return A string representing the term.
+*)
 
 val replace : t * t -> t -> t
 (** Traverses the given term recursively

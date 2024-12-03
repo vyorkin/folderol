@@ -15,6 +15,21 @@ type t =
 [@@deriving eq, show]
 
 val pp_formula : Format.formatter -> t -> unit
+(** 
+  Prints a formula using the given [fmt] formatter.
+  
+  @param fmt The formatter used to print the formula.
+  @param formula The formula to format.
+  @return unit
+*)
+
+val formula_to_string : t -> string
+(** 
+  Prints a formula.
+
+  @param formula The formula to convert to a string.
+  @return A string representing the formula.
+*)
 
 val abstract : Term.t -> t -> t
 (** Replaces occurences of [Term.t] by a bound variable. *)
