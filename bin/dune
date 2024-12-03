@@ -1,4 +1,4 @@
 (executable
  (public_name folderol)
  (name main)
- (libraries folderol))
+ (libraries folderol.lib))

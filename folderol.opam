@@ -9,8 +9,13 @@ license: "MIT"
 homepage: "https://github.com/vyorkin/folderol"
 bug-reports: "https://github.com/vyorkin/folderol/issues"
 depends: [
-  "ocaml"
-  "dune" {>= "3.16"}
+  "ocaml" {>= "5.2"}
+  "dune" {>= "3.16" & >= "3.16"}
+  "core" {build}
+  "ppx_deriving" {>= "6.0"}
+  "menhir" {build & = "20240715"}
+  "menhirLib" {build & = "20240715"}
+  "ppx_inline_test" {build}
   "odoc" {with-doc}
 ]
 build: [

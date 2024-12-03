@@ -1,10 +1,60 @@
+open Pretty_print
 module List = Core.List
+
+type connective = Conj | Disj | Impl | Iff | Not
+[@@deriving eq, show { with_path = false }]
+
+let pp_connective fmt = function
+  | Conj -> Format.fprintf fmt "∧"
+  | Disj -> Format.fprintf fmt "∨"
+  | Impl -> Format.fprintf fmt "→"
+  | Iff -> Format.fprintf fmt "↔"
+  | Not -> Format.fprintf fmt "¬"
+
+type quantifier = Forall | Exists [@@deriving eq, show { with_path = false }]
+
+let pp_quantifier fmt = function
+  | Forall -> Format.fprintf fmt "∀"
+  | Exists -> Format.fprintf fmt "∃"
 
 type t =
   | Pred of string * Term.t list
-  | Conn of string * t list
-  | Quant of string * string * t
+  | Conn of connective * t list
+  | Quant of quantifier * string * t
 [@@deriving eq, show { with_path = false }]
+
+let is_pred = function Pred _ -> true | _ -> false
+
+let rec pp_formula fmt = function
+  | Pred (name, terms) ->
+      Format.fprintf fmt "%s(%a)" name
+        (Format.pp_print_list ~pp_sep:pp_comma Term.pp_term)
+        terms
+  | Conn (connective, subformulas) -> (
+      match connective with
+      | Not -> pp_not fmt (List.hd_exn subformulas)
+      | conn ->
+          Format.open_vbox 0;
+          (Format.pp_print_list
+             ~pp_sep:(fun fmt () ->
+               Format.pp_print_space fmt ();
+               pp_connective fmt conn;
+               Format.pp_print_space fmt ())
+             pp_formula)
+            fmt subformulas;
+          Format.close_box ())
+  | Quant (quantifier, var, body) ->
+      Format.open_hovbox 2;
+      Format.fprintf fmt "%a%s." pp_quantifier quantifier var;
+      if is_pred body then pp_formula fmt body
+      else Format.fprintf fmt "(%a)" (fun fmt body -> pp_formula fmt body) body;
+      Format.close_box ()
+
+and pp_not fmt subformula =
+  pp_connective fmt Not;
+  Format.open_box 0;
+  pp_formula fmt subformula;
+  Format.close_box ()
 
 let abstract term formula =
   let rec abs ix = function
@@ -44,18 +94,18 @@ let%test "abstract with nested formula" =
   let term = Term.Var "x" in
   let formula =
     Conn
-      ( "&",
+      ( Conj,
         [
           Pred ("P", [ Term.Var "x" ]);
-          Quant ("forall", "y", Pred ("Q", [ Term.Var "x" ]));
+          Quant (Forall, "y", Pred ("Q", [ Term.Var "x" ]));
         ] )
   in
   let expected =
     Conn
-      ( "&",
+      ( Conj,
         [
           Pred ("P", [ Term.Bound 0 ]);
-          Quant ("forall", "y", Pred ("Q", [ Term.Bound 1 ]));
+          Quant (Forall, "y", Pred ("Q", [ Term.Bound 1 ]));
         ] )
   in
   expected = abstract term formula
@@ -78,18 +128,54 @@ let%test "subst_bound_var with nested formula" =
   let term = Term.Var "z" in
   let formula =
     Conn
-      ( "|",
+      ( Disj,
         [
           Pred ("P", [ Term.Bound 0 ]);
-          Quant ("exists", "y", Pred ("Q", [ Term.Bound 1 ]));
+          Quant (Exists, "y", Pred ("Q", [ Term.Bound 1 ]));
         ] )
   in
   let expected =
     Conn
-      ( "|",
+      ( Disj,
         [
           Pred ("P", [ Term.Var "z" ]);
-          Quant ("exists", "y", Pred ("Q", [ Term.Var "z" ]));
+          Quant (Exists, "y", Pred ("Q", [ Term.Var "z" ]));
         ] )
   in
   expected = subst_bound_var term formula
+
+(* Pretty-print helper function *)
+let pp_formula_to_string formula =
+  let open Format in
+  let buffer = Buffer.create 16 in
+  let fmt = formatter_of_buffer buffer in
+  pp_open_hvbox fmt 0;
+  pp_formula fmt formula;
+  pp_close_box fmt ();
+  pp_print_flush fmt ();
+  Buffer.contents buffer
+
+let test_pp_formula expected formula =
+  let actual = pp_formula_to_string formula in
+  if actual <> expected then
+    failwith (Printf.sprintf "Expected: %s\nActual: %s" expected actual)
+
+let%test_unit "Pretty-print conjunction" =
+  test_pp_formula "P(x) ∧ Q(y)"
+    (Conn (Conj, [ Pred ("P", [ Var "x" ]); Pred ("Q", [ Var "y" ]) ]))
+
+let%test_unit "Pretty-print quantified formula" =
+  test_pp_formula "∀x.P(x)" (Quant (Forall, "x", Pred ("P", [ Var "x" ])))
+
+let%test_unit "Pretty-print implication" =
+  test_pp_formula "P(x) → ∃y.(Q(y) ∨ R(z))"
+    (Conn
+       ( Impl,
+         [
+           Pred ("P", [ Var "x" ]);
+           Quant
+             ( Exists,
+               "y",
+               Conn (Disj, [ Pred ("Q", [ Var "y" ]); Pred ("R", [ Var "z" ]) ])
+             );
+         ] ))

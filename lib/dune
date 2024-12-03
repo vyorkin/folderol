@@ -2,12 +2,19 @@
  (modules lexer))
 
 (menhir
- (modules parser))
+ (modules parser)
+ (flags
+  ("--dump" "--explain")))
 
 (library
- (name folderol)
+ (public_name folderol.lib)
+ (name FolderolLib)
  (inline_tests)
  (libraries core)
- (preprocess (pps ppx_deriving.show ppx_deriving.eq ppx_inline_test)))
+ (preprocess
+  (pps ppx_deriving.show ppx_deriving.eq ppx_inline_test)))
 
-(env (dev (flags (:standard -warn-error -A))))
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A))))

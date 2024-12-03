@@ -7,6 +7,23 @@ type t =
   | Function of string * t list  (** Function application. *)
 [@@deriving eq, show]
 
+(** 
+  Prints the term [t] using the format output function [fmt].
+
+  Example usage:
+
+  {[
+    pp_term fmt (Var "x");
+    pp_term fmt (Param ("f", ["x"; "y"]));
+    pp_term fmt (Bound 3);
+    pp_term fmt (Function ("add", [Var "x"; Var "y"]));
+  ]}
+  
+  @param fmt The formatter to which the formatted term is output.
+  @param t The term to be formatted.
+*)
+val pp_term: Format.formatter -> t -> unit
+
 val replace : t * t -> t -> t
 (** Traverses the given term recursively
     and replaces all occurrences of [old_term] with [new_term]. 

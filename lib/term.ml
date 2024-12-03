@@ -1,3 +1,4 @@
+open Pretty_print
 module List = Core.List
 
 type t =
@@ -6,6 +7,24 @@ type t =
   | Bound of int
   | Function of string * t list
 [@@deriving eq, show { with_path = false }]
+
+let rec pp_term fmt = function
+  | Var x -> Format.fprintf fmt "%s" x
+  | Param (name, vars) ->
+      Format.fprintf fmt "%s(%a)" name
+        (fun fmt vars ->
+          Format.open_hvbox 0;
+          Format.pp_print_list ~pp_sep:pp_comma Format.pp_print_string fmt vars;
+          Format.close_box ())
+        vars
+  | Bound ix -> Format.fprintf fmt "%d" ix
+  | Function (name, args) ->
+      Format.fprintf fmt "%s(%a)" name
+        (fun fmt args ->
+          Format.open_hvbox 2;
+          Format.pp_print_list ~pp_sep:pp_comma pp_term fmt args;
+          Format.close_box ())
+        args
 
 let rec replace (old_term, new_term) term =
   if term = old_term then new_term
@@ -40,3 +59,47 @@ let%test "replace works with deeply nested functions" =
     Function ("f", [ Function ("g", [ Bound 99; Bound 2 ]); Bound 99 ])
   in
   result = expected
+
+(* Pretty-print helper function *)
+let pp_term_to_string term =
+  let open Format in
+  let buffer = Buffer.create 16 in
+  let fmt = formatter_of_buffer buffer in
+  pp_term fmt term;
+  pp_print_flush fmt ();
+  Buffer.contents buffer
+
+(* Custom assertion for tests *)
+let test_pp_term ~expected term =
+  let actual = pp_term_to_string term in
+  if actual <> expected then
+    failwith (Printf.sprintf "Expected: %s\nActual: %s" expected actual)
+
+let%test_unit "Pretty-print variable" = test_pp_term ~expected:"x" (Var "x")
+
+let%test_unit "Pretty-print parameter" =
+  test_pp_term ~expected:"f(x, y, z)" (Param ("f", [ "x"; "y"; "z" ]))
+
+let%test_unit "Pretty-print bound variable" =
+  test_pp_term ~expected:"42" (Bound 42)
+
+let%test_unit "Pretty-print function with no arguments" =
+  test_pp_term ~expected:"g()" (Function ("g", []))
+
+let%test_unit "Pretty-print function with arguments" =
+  test_pp_term ~expected:"h(x, f(a, b))"
+    (Function ("h", [ Var "x"; Function ("f", [ Var "a"; Var "b" ]) ]))
+
+let%test_unit "Pretty-print nested functions" =
+  test_pp_term ~expected:"k(h(f(a), g(b, c)), x)"
+    (Function
+       ( "k",
+         [
+           Function
+             ( "h",
+               [
+                 Function ("f", [ Var "a" ]);
+                 Function ("g", [ Var "b"; Var "c" ]);
+               ] );
+           Var "x";
+         ] ))
