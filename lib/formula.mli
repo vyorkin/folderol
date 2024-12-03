@@ -20,7 +20,6 @@ val pp_formula : Format.formatter -> t -> unit
   
   @param fmt The formatter used to print the formula.
   @param formula The formula to format.
-  @return unit
 *)
 
 val formula_to_string : t -> string
