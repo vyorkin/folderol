@@ -2,3 +2,11 @@
  (public_name folderol)
  (name main)
  (libraries folderol.lib))
+
+(env
+ (dev
+  (flags
+   (:standard -warn-error -A)))
+
+ (release
+  (ocamlopt_flags :standard -ccopt -static)))
