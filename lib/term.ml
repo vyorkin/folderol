@@ -26,13 +26,7 @@ let rec pp_term fmt = function
           Format.close_box ())
         args
 
-let term_to_string term =
-  let open Format in
-  let buffer = Buffer.create 16 in
-  let fmt = formatter_of_buffer buffer in
-  pp_term fmt term;
-  pp_print_flush fmt ();
-  Buffer.contents buffer
+let term_to_string = format_to_string pp_term
 
 let rec replace (old_term, new_term) term =
   if term = old_term then new_term

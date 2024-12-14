@@ -57,15 +57,7 @@ and pp_not fmt subformula =
   pp_formula fmt subformula;
   Format.close_box ()
 
-let formula_to_string formula =
-  let open Format in
-  let buffer = Buffer.create 16 in
-  let fmt = formatter_of_buffer buffer in
-  pp_open_hvbox fmt 0;
-  pp_formula fmt formula;
-  pp_close_box fmt ();
-  pp_print_flush fmt ();
-  Buffer.contents buffer
+let formula_to_string = format_to_string pp_formula
 
 let abstract term formula =
   let rec abs ix = function

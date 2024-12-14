@@ -65,4 +65,3 @@ term:
   | IX                    { Bound($1) }
   | STRING "(" terms ")"  { Function($1, $3) }
   ;
-
