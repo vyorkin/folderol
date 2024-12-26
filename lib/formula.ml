@@ -1,4 +1,4 @@
-open Pretty_print
+open Pretty_printing
 module List = Core.List
 
 type connective = Conj | Disj | Impl | Iff | Not
@@ -57,7 +57,7 @@ and pp_not fmt subformula =
   pp_formula fmt subformula;
   Format.close_box ()
 
-let formula_to_string = format_to_string pp_formula
+let to_string = format_to_string pp_formula
 
 let abstract term formula =
   let rec abs ix = function
@@ -148,7 +148,7 @@ let%test "subst_bound_var with nested formula" =
   expected = subst_bound_var term formula
 
 let test_pp_formula expected formula =
-  let actual = formula_to_string formula in
+  let actual = to_string formula in
   if actual <> expected then
     failwith (Printf.sprintf "Expected: %s\nActual: %s" expected actual)
 

@@ -22,7 +22,7 @@ val pp_formula : Format.formatter -> t -> unit
   @param formula The formula to format.
 *)
 
-val formula_to_string : t -> string
+val to_string : t -> string
 (** 
   Prints a formula.
 

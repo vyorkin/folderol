@@ -1,4 +1,4 @@
-open Pretty_print
+open Pretty_printing
 module List = Core.List
 
 type t =
@@ -26,7 +26,7 @@ let rec pp_term fmt = function
           Format.close_box ())
         args
 
-let term_to_string = format_to_string pp_term
+let to_string = format_to_string pp_term
 
 let rec replace (old_term, new_term) term =
   if term = old_term then new_term
@@ -64,7 +64,7 @@ let%test "replace works with deeply nested functions" =
 
 (* Custom assertion for tests *)
 let test_pp_term ~expected term =
-  let actual = term_to_string term in
+  let actual = to_string term in
   if actual <> expected then
     failwith (Printf.sprintf "Expected: %s\nActual: %s" expected actual)
 
