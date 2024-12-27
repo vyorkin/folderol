@@ -46,7 +46,10 @@ and occurs_in_any_of env var terms =
 let rec unify env (f1, f2) =
   match (f1, f2) with
   | Formula.Pred (p1, ts), Formula.Pred (p2, us) ->
-      if p1 = p2 then unify_terms env (ts, us) else Error "blya"
+      if p1 = p2 then unify_terms env (ts, us)
+      else
+        Error
+          (Printf.sprintf "Can not unify different predicates %s and %s" p1 p2)
   | _, _ ->
       Error
         (Printf.sprintf
@@ -207,4 +210,139 @@ let%test "unify: nested function unification" =
   | Ok env' ->
       let resolved = chase_var env' (Term.Var "x") in
       resolved = Term.Function ("g", [])
+  | Error _ -> false
+
+let%test "unify: nested function unification with variables" =
+  (* P(f(x, g(y)), z) = P(f(a, g(b)), h(c))
+     expected: x -> a, y -> b, z -> h(c) *)
+  let env = Env.empty in
+  let f1 =
+    Formula.Pred
+      ( "P",
+        [
+          Term.Function
+            ("f", [ Term.Var "x"; Term.Function ("g", [ Term.Var "y" ]) ]);
+          Term.Var "z";
+        ] )
+  in
+  let f2 =
+    Formula.Pred
+      ( "P",
+        [
+          Term.Function
+            ( "f",
+              [
+                Term.Param ("a", []);
+                Term.Function ("g", [ Term.Param ("b", []) ]);
+              ] );
+          Term.Function ("h", [ Term.Param ("c", []) ]);
+        ] )
+  in
+  match unify env (f1, f2) with
+  | Ok env' ->
+      let x = chase_var env' (Term.Var "x") in
+      let y = chase_var env' (Term.Var "y") in
+      let z = chase_var env' (Term.Var "z") in
+      x = Term.Param ("a", [])
+      && y = Term.Param ("b", [])
+      && z = Term.Function ("h", [ Term.Param ("c", []) ])
+  | Error _ -> false
+
+let%test "unify: failure due to different nested functions" =
+  (* P(f(x), g(y)) != P(h(a), g(b))
+     expected: Error *)
+  let env = Env.empty in
+  let f1 =
+    Formula.Pred
+      ( "P",
+        [
+          Term.Function ("f", [ Term.Var "x" ]);
+          Term.Function ("g", [ Term.Var "y" ]);
+        ] )
+  in
+  let f2 =
+    Formula.Pred
+      ( "P",
+        [
+          Term.Function ("h", [ Term.Param ("a", []) ]);
+          Term.Function ("g", [ Term.Param ("b", []) ]);
+        ] )
+  in
+  match unify env (f1, f2) with Ok _ -> false | Error _ -> true
+
+let%test "unify: deeply nested structure" =
+  (* P(f(g(h(x))), y) = P(f(g(h(a))), b)
+     expected: x -> a, y -> b *)
+  let env = Env.empty in
+  let f1 =
+    Formula.Pred
+      ( "P",
+        [
+          Term.Function
+            ( "f",
+              [ Term.Function ("g", [ Term.Function ("h", [ Term.Var "x" ]) ]) ]
+            );
+          Term.Var "y";
+        ] )
+  in
+  let f2 =
+    Formula.Pred
+      ( "P",
+        [
+          Term.Function
+            ( "f",
+              [
+                Term.Function
+                  ("g", [ Term.Function ("h", [ Term.Param ("a", []) ]) ]);
+              ] );
+          Term.Param ("b", []);
+        ] )
+  in
+  match unify env (f1, f2) with
+  | Ok env' ->
+      let x = chase_var env' (Term.Var "x") in
+      let y = chase_var env' (Term.Var "y") in
+      x = Term.Param ("a", []) && y = Term.Param ("b", [])
+  | Error _ -> false
+
+let%test "unify: multiple variables in deep structure" =
+  (* P(f(x, g(y, z)), h(w)) = P(f(a, g(b, c)), h(d))
+     expected: x -> a, y -> b, z -> c, w -> d *)
+  let env = Env.empty in
+  let f1 =
+    Formula.Pred
+      ( "P",
+        [
+          Term.Function
+            ( "f",
+              [
+                Term.Var "x"; Term.Function ("g", [ Term.Var "y"; Term.Var "z" ]);
+              ] );
+          Term.Function ("h", [ Term.Var "w" ]);
+        ] )
+  in
+  let f2 =
+    Formula.Pred
+      ( "P",
+        [
+          Term.Function
+            ( "f",
+              [
+                Term.Param ("a", []);
+                Term.Function
+                  ("g", [ Term.Param ("b", []); Term.Param ("c", []) ]);
+              ] );
+          Term.Function ("h", [ Term.Param ("d", []) ]);
+        ] )
+  in
+  match unify env (f1, f2) with
+  | Ok env' ->
+      let x = chase_var env' (Term.Var "x") in
+      let y = chase_var env' (Term.Var "y") in
+      let z = chase_var env' (Term.Var "z") in
+      let w = chase_var env' (Term.Var "w") in
+      x = Term.Param ("a", [])
+      && y = Term.Param ("b", [])
+      && z = Term.Param ("c", [])
+      && w = Term.Param ("d", [])
   | Error _ -> false
