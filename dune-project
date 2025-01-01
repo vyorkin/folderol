@@ -35,5 +35,4 @@
   (menhirLib
    (and
     :build
-    (= 20240715)))
-  (ppx_inline_test :build)))
+    (= 20240715)))))

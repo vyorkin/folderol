@@ -8,7 +8,7 @@
     Keeping environment allows us to ensure that cycles are 
     prevented using occurs check which disallows assignments like [(?b, f(?a)), (?a, g(?b))]. *)
 module Env : sig
-  type t
+  type t [@@deriving eq]
   (** Type representing the environment,
       which maps meta-variables to terms. *)
 
@@ -30,7 +30,31 @@ module Env : sig
       @param env The environment to search.
       @param var The variable whose assignment is sought.
       @return [Some term] if [var] is assigned to [term], otherwise [None]. *)
+
+  val pp : Format.formatter -> t -> unit
+  (** Prints the env [t] using the format output function [fmt].
+
+      @param fmt The formatter to which the formatted env is output.
+      @param t The env to be formatted. *)
+
+  val equal : t -> t -> bool
 end
+
+val chase_var : Env.t -> Term.t -> Term.t
+(** Resolves the given term (if it is a variable)
+    by repeatedly replacing it with its assignment in the environment [env].
+
+    For example, if [env] contains mappings ?a -> ?b and ?b -> ?c,
+    then [chase_var env (Term.Var "a")] will return [Term.Var "c"].
+
+    @param env The environment mapping variables to terms.
+    @param term The term to resolve.
+    @return The resolved term, or the input term if no resolution is possible. *)
+
+val occurs_in : Env.t -> string -> Term.t -> bool
+(** Performs the "Occurs check".
+
+    @return [true] if [var] occurs in the given term. *)
 
 val unify : Env.t -> Formula.t * Formula.t -> (Env.t, string) result
 (** 

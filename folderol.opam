@@ -15,7 +15,6 @@ depends: [
   "ppx_deriving" {>= "6.0"}
   "menhir" {build & = "20240715"}
   "menhirLib" {build & = "20240715"}
-  "ppx_inline_test" {build}
   "odoc" {with-doc}
 ]
 build: [
