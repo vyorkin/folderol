@@ -8,6 +8,9 @@ type t =
   | Function of string * t list  (** Function application. *)
 [@@deriving eq, show]
 
+val variable_names : string list -> t -> string list
+(** Accumulates distinct variable names in a term. *)
+
 val pp_term : Format.formatter -> t -> unit
 (** Prints the term [t] using the format output function [fmt].
 

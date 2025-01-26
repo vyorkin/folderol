@@ -14,6 +14,9 @@ type t =
       the name of bound variable (used only for printing) and the body. *)
 [@@deriving eq, show]
 
+val is_pred : t -> bool
+(** Returns [true] if formula is a predicate. *)
+
 val pp_formula : Format.formatter -> t -> unit
 (** 
   Prints a formula using the given [fmt] formatter.

@@ -2,6 +2,8 @@ open FolderolLib
 
 let term_testable = Term.(Alcotest.testable pp equal)
 
+(* replace *)
+
 let test_replace_in_simple_term () =
   let term = Term.Var "x" in
   let result = Term.replace (Var "x", Bound 42) term in
@@ -30,6 +32,8 @@ let test_replace_in_deeply_nested_function () =
   in
   Alcotest.(check term_testable)
     "replace: in a deeply nested function" expected result
+
+(* pp *)
 
 let test_pp_variable () =
   let expected = "x" in
