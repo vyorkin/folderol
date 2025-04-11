@@ -1,3 +1,5 @@
+open Util
+
 type side = L | R [@@deriving eq, show { with_path = false }]
 type cost = int
 type goal_entry = cost * side * Formula.t
@@ -132,9 +134,6 @@ let insert_goal_entry_early = insert_goal_entry ~less:goal_entry_less
 let insert_goal_entry_late = insert_goal_entry ~less:goal_entry_less_or_eq
 
 let new_goal goal formulas =
-  let rec accumulate f xs =
-    match xs with [], y -> y | x :: xs', y -> accumulate f (xs', f (x, y))
-  in
   let estimated_formulas = List.map add_estimation formulas in
   accumulate insert_goal_entry_early (estimated_formulas, goal)
 
