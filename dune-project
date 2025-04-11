@@ -15,6 +15,7 @@
  (synopsis "My little theorem prover")
  (description
   "Toy theorem prover based on the Designing a Theorem Prover paper by Lawrence C. Paulson.")
+
  (depends
   (ocaml
    (>= 5.3))
