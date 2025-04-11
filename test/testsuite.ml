@@ -2,6 +2,12 @@ let () =
   let open Alcotest in
   run "Folderol"
     [
+      ( "Symbol",
+        [
+          test_case "Generate simple symbol" `Quick Symbol_test.test_mk_symbol;
+          test_case "Generate multiple symbols" `Quick
+            Symbol_test.test_mk_multiple_symbols;
+        ] );
       ( "Term",
         [
           test_case "Replace in a simple term" `Quick

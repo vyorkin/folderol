@@ -6,7 +6,9 @@ type side = L | R [@@deriving eq, show]
 type cost = int
 type goal_entry = cost * side * Formula.t
 type goal = goal_entry list
+
 type goal_table = goal list
+(** Proof state *)
 
 val inst_term : Env.t -> Term.t -> Term.t
 (** Recursively applies substitutions to a term based on the given environment
@@ -82,6 +84,36 @@ val solve_goal : goal -> (Formula.t * unifier) list
 
 val insert_goals :
   goal_table -> goal list * Formula.t list -> Formula.t list * goal_table
+(** Tries to solve each goal from the [goal list * Formula.t]. After solving the
+    goal it instantiates all the other goals with the resulting env (unifier),
+    since its variables may appear in other goals. *)
 
 val cost : side * Formula.t -> cost
+(** Cost of ∀L and ∃R is 3. The cost of other rules is the number of premises.
+*)
+
 val add_estimation : side * Formula.t -> cost * side * Formula.t
+(** Estimates formula cost and attaches it. *)
+
+val insert_goal_entry :
+  less:(goal_entry * goal_entry -> bool) -> goal_entry * goal -> goal
+(** The entries in a goal are ordered by cost - the first entry is the cheapest.
+    This function helps to maintain goal_entry's in order.
+
+    @param less
+      Comparison function: [<] to place the new entry first among entries of
+      equal cost, [<=] to place it at the end. *)
+
+val insert_goal_entry_early : goal_entry * goal -> goal
+(** Inserts a new [goal_entry] by placing it first among entries of equal cost.
+*)
+
+val insert_goal_entry_late : goal_entry * goal -> goal
+(** Inserts a new [goal_entry] by placing it at the end of entries of equal
+    cost. *)
+
+val new_goal : goal -> (side * Formula.t) list -> goal
+val new_goals : goal -> (side * Formula.t) list list -> goal list
+
+val reduce_goal : goal -> side * Formula.t -> goal
+(** Reduces goal. *)

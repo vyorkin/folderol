@@ -354,3 +354,7 @@ let test_insert_goals_nested () =
     "insert_goals nested: final_fs" expected_fs final_fs;
   Alcotest.(check goal_table_testable)
     "insert_goals nested: final_goal_table" expected_goal_table final_goal_table
+
+(* reduce_goal *)
+
+(* let reduce_goal pair goal = failwith "whatever nahooy" *)

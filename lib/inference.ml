@@ -68,8 +68,10 @@ let rec insert_goals goal_table = function
   | g :: gs, fs -> (
       match solve_goal g with
       | (f, u) :: _ ->
+          (* instantiate other goals with the resulting unifier *)
           let goal_table' = inst_goals u goal_table in
           let f' = inst_formula u f in
+          (* instantiate remaining goals *)
           let gs' = inst_goals u gs in
           insert_goals goal_table' (gs', f' :: fs)
       | [] ->
@@ -99,3 +101,43 @@ let cost (side, connective) =
 
 let add_estimation (side, connective) =
   (cost (side, connective), side, connective)
+
+(* insert 1 into [1, 3, 0, 1]:
+          ^       ^
+          y       x
+
+   [<, 1]: insert_late
+    match 1, 1 :: 3 :: 0 :: 1 ->
+    if 1 <  1 then 1 :: insert (<) (1, 3 :: 0 :: 1) else 1 :: 1 :: 3 :: 0 :: 1
+                   ^                ^                    ^    ^
+                   y                x                    x    y
+                                                        \--------------------/
+
+   [<=, 1]: insert_early
+    match 1, 1 :: 3 :: 0 :: 1 ->
+    if 1 <= 1 then 1 :: insert (<) (1, 3 :: 0 :: 1) else 1 :: 1 :: 3 :: 0 :: 1
+                   ^                ^                    ^    ^
+                   y                x                    x    y
+                  \-------------------------------/
+   *)
+
+let rec insert_goal_entry ~less = function
+  | x, [] -> [ x ]
+  | x, y :: ys ->
+      if less (y, x) then y :: insert_goal_entry ~less (x, ys) else x :: y :: ys
+
+let goal_entry_less ((cost0, _, _), (cost1, _, _)) = cost0 < cost1
+let goal_entry_less_or_eq ((cost0, _, _), (cost1, _, _)) = cost0 <= cost1
+let insert_goal_entry_early = insert_goal_entry ~less:goal_entry_less
+let insert_goal_entry_late = insert_goal_entry ~less:goal_entry_less_or_eq
+
+let new_goal goal formulas =
+  let rec accumulate f xs =
+    match xs with [], y -> y | x :: xs', y -> accumulate f (xs', f (x, y))
+  in
+  let estimated_formulas = List.map add_estimation formulas in
+  accumulate insert_goal_entry_early (estimated_formulas, goal)
+
+let new_goals goal = List.map (new_goal goal)
+let reduce_goal goal formula = failwith "hooy"
+(*   let goals = new_goals g in *)
