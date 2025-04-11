@@ -14,8 +14,20 @@ type t =
           printing) and the body. *)
 [@@deriving eq, show]
 
+(** Γ |- ∆ *)
+type side = L | R [@@deriving eq, show]
+
+type cost = int [@@deriving eq, show]
+
 val is_pred : t -> bool
 (** Returns [true] if formula is a predicate. *)
+
+val cost : side * t -> cost
+(** Cost of ∀L and ∃R is 3. The cost of other rules is the number of premises.
+*)
+
+val add_estimation : side * t -> cost * side * t
+(** Estimates formula cost and attaches it. *)
 
 val pp_formula : Format.formatter -> t -> unit
 (** Prints a formula using the given [fmt] formatter.

@@ -23,7 +23,38 @@ type t =
   | Quant of quantifier * string * t
 [@@deriving eq, show { with_path = false }]
 
+type side = L | R [@@deriving eq, show { with_path = false }]
+type cost = int [@@deriving eq, show { with_path = false }]
+
 let is_pred = function Pred _ -> true | _ -> false
+
+let cost (side, connective) =
+  match (side, connective) with
+  (* 1 subgoal *)
+  | _, Conn (Not, _) -> 1
+  | L, Conn (Conj, _) -> 1
+  | R, Conn (Disj, _) -> 1
+  | R, Conn (Impl, _) -> 1
+  | R, Quant (Forall, _, _) -> 1
+  | L, Quant (Exists, _, _) -> 1
+  (* 2 subgoals *)
+  | R, Conn (Conj, _) -> 2
+  | L, Conn (Disj, _) -> 2
+  | L, Conn (Impl, _) -> 2
+  | _, Conn (Iff, _) -> 2
+  (* quantifier expansion *)
+  | L, Quant (Forall, _, _) -> 3
+  | R, Quant (Exists, _, _) -> 3
+  (* no reductions *)
+  | _, _ -> 4
+
+let add_estimation (side, connective) =
+  (cost (side, connective), side, connective)
+
+let rec accumulate f = function
+  | Pred (_, args), ys -> Util.accumulate f (args, ys)
+  | Conn (_, subformulas), ys -> Util.accumulate (accumulate f) (subformulas, ys)
+  | Quant (_, _, body), ys -> accumulate f (body, ys)
 
 let rec pp_formula fmt = function
   | Pred (name, terms) ->

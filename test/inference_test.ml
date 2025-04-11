@@ -6,7 +6,7 @@ open Inference
 let env_testable = Alcotest.testable Env.pp Env.equal
 let term_testable = Alcotest.testable Term.pp Term.equal
 let formula_testable = Alcotest.testable Formula.pp Formula.equal
-let side_testable = Alcotest.testable pp_side equal_side
+let side_testable = Alcotest.testable Formula.pp_side Formula.equal_side
 let goal_entry_testable = Alcotest.(triple int side_testable formula_testable)
 let goal_testable = Alcotest.(list goal_entry_testable)
 let goal_table_testable = Alcotest.(list goal_testable)
