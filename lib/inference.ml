@@ -138,5 +138,12 @@ let new_goal goal formulas =
   accumulate insert_goal_entry_early (estimated_formulas, goal)
 
 let new_goals goal = List.map (new_goal goal)
+
+let accumulate_formulas f (as, bs) =
+  match (as, bs) with
+  | (Formula.Pred (_, args), bs) -> failwith "todo"
+  | (Formula.Conn (_, subformulas), bs) -> failwith "todo"
+  | (Formula.Quant (_, _, body), bs) -> failwith "todo"
+
 let reduce_goal goal formula = failwith "hooy"
 (*   let goals = new_goals g in *)
