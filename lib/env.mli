@@ -1,16 +1,15 @@
 (** Module representing the environment for unification.
 
     The environment is used to avoid repeatedly substituting meta-variables
-    throughout the equations every time a meta-variable is assigned. Instead,
-    it maintains a mapping of meta-variable -> term assignments and resolves
-    terms on-the-fly.
+    throughout the equations every time a meta-variable is assigned. Instead, it
+    maintains a mapping of meta-variable -> term assignments and resolves terms
+    on-the-fly.
 
-    Keeping environment allows us to ensure that cycles are 
-    prevented using occurs check which disallows assignments like [(?b, f(?a)), (?a, g(?b))]. *)
+    Keeping environment allows us to ensure that cycles are prevented using
+    occurs check which disallows assignments like [(?b, f(?a)), (?a, g(?b))]. *)
 
 type t [@@deriving eq]
-(** Type representing the environment,
-      which maps meta-variables to terms. *)
+(** Type representing the environment, which maps meta-variables to terms. *)
 
 val empty : t
 (** Empty environment with no variable assignments. *)

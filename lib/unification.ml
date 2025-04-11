@@ -23,8 +23,8 @@ and occurs_in_any_of env var terms =
   let term = List.find_opt (fun term -> occurs_in env var term) terms in
   Option.is_some term
 
-(** Handles only atomic formulas (predicates),
-    like [P(t1, ..., tn)] and [Q(u1, ..., un)]. *)
+(** Handles only atomic formulas (predicates), like [P(t1, ..., tn)] and
+    [Q(u1, ..., un)]. *)
 let rec unify env (f1, f2) =
   match (f1, f2) with
   | Formula.Pred (p1, ts), Formula.Pred (p2, us) ->

@@ -7,6 +7,5 @@
  (dev
   (flags
    (:standard -warn-error -A)))
-
  (release
   (ocamlopt_flags :standard -ccopt -static)))
