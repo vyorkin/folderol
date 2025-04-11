@@ -18,8 +18,6 @@
  (depends
   (ocaml
    (>= 5.3))
-  (dune
-   (>= 3.16))
   (alcotest :with-test)
   (core :build)
   ppx_let
