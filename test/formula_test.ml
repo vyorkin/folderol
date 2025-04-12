@@ -4,6 +4,8 @@ open Formula
 
 let formula_testable = Alcotest.testable pp equal
 
+(* abstract *)
+
 let test_abstract_simple_formula () =
   let term = Var "x" in
   let formula = Pred ("P", [ Var "x"; Function ("f", [ Var "y"; Var "x" ]) ]) in
@@ -31,6 +33,8 @@ let test_abstract_nested_formula () =
   in
   Alcotest.(check formula_testable)
     "abstract: nested formula" expected (abstract term formula)
+
+(* subst *)
 
 let test_subst_bound_var_simple_formula () =
   let term = Var "z" in
@@ -61,6 +65,12 @@ let test_subst_bound_var_nested_formula () =
   Alcotest.(check formula_testable)
     "subst_bound_var: nested formula" expected
     (subst_bound_var term formula)
+
+(* accumulate *)
+
+(* TODO: add tests for the accumulate function *)
+
+(* pp *)
 
 let test_pp_conjunction_formula () =
   let actual =

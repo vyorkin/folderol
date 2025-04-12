@@ -4,12 +4,14 @@ module List = Core.List
 type connective = Conj | Disj | Impl | Iff | Not
 [@@deriving eq, show { with_path = false }]
 
-let pp_connective fmt = function
-  | Conj -> Format.fprintf fmt "∧"
-  | Disj -> Format.fprintf fmt "∨"
-  | Impl -> Format.fprintf fmt "→"
-  | Iff -> Format.fprintf fmt "↔"
-  | Not -> Format.fprintf fmt "¬"
+let pp_connective fmt conn =
+  let open Format in
+  match conn with
+  | Conj -> fprintf fmt "∧"
+  | Disj -> fprintf fmt "∨"
+  | Impl -> fprintf fmt "→"
+  | Iff -> fprintf fmt "↔"
+  | Not -> fprintf fmt "¬"
 
 type quantifier = Forall | Exists [@@deriving eq, show { with_path = false }]
 

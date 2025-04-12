@@ -10,6 +10,10 @@ let goal_entry_testable = Alcotest.(triple int side_testable formula_testable)
 let goal_testable = Alcotest.(list goal_entry_testable)
 let goal_table_testable = Alcotest.(list goal_testable)
 
+(* accumulate *)
+
+(* TODO: add tests for the accumulate function *)
+
 (* split *)
 
 let test_split_empty_goal () =
