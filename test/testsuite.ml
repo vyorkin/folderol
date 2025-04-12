@@ -118,65 +118,62 @@ let () =
       ( "Instantiation: Term",
         [
           test_case "no substitution" `Quick
-            Inference_test.test_inst_term_with_no_substitution;
+            Instantiation_test.test_instantiate_term_with_no_substitution;
           test_case "single substitution" `Quick
-            Inference_test.test_inst_term_with_single_substitution;
+            Instantiation_test.test_instantiate_term_with_single_substitution;
           test_case "nested substitution" `Quick
-            Inference_test.test_inst_term_nested_substitution;
+            Instantiation_test.test_instantiate_term_nested_substitution;
         ] );
       ( "Instantiation: Formula",
         [
           test_case "no substitution" `Quick
-            Inference_test.test_inst_formula_with_no_substitution;
+            Instantiation_test.test_instantiate_formula_with_no_substitution;
           test_case "with substitution" `Quick
-            Inference_test.test_inst_formula_with_substitution;
+            Instantiation_test.test_instantiate_formula_with_substitution;
           test_case "nested substitution" `Quick
-            Inference_test.test_inst_formula_with_nested_substitution;
+            Instantiation_test.test_instantiate_formula_with_nested_substitution;
         ] );
-      ( "Instantiation: Single Goal",
+      ( "Instantiation: Single goal",
         [
           test_case "no substitution" `Quick
-            Inference_test.test_inst_goal_with_no_substitution;
+            Instantiation_test.test_instantiate_goal_with_no_substitution;
           test_case "applies substitution" `Quick
-            Inference_test.test_inst_goal_single_substitution;
+            Instantiation_test.test_instantiate_goal_single_substitution;
           test_case "nested substitution" `Quick
-            Inference_test.test_inst_goal_nested_substitution;
+            Instantiation_test.test_instantiate_goal_nested_substitution;
           test_case "multiple substitutions" `Quick
-            Inference_test.test_inst_goal_with_multiple_substitutions;
+            Instantiation_test.test_instantiate_goal_with_multiple_substitutions;
         ] );
-      ( "Instantiation: Goal List",
+      ( "Instantiation: Goal list",
         [
           test_case "no substitution" `Quick
-            Inference_test.test_inst_goals_with_no_substitution;
+            Instantiation_test.test_instantiate_goals_with_no_substitution;
           test_case "with substitution" `Quick
-            Inference_test.test_inst_goals_single_substitution;
+            Instantiation_test.test_instantiate_goals_single_substitution;
           test_case "nested substitution" `Quick
-            Inference_test.test_inst_goals_nested_substitution;
+            Instantiation_test.test_instantiate_goals_nested_substitution;
         ] );
-      ( "Inference: Split Goal",
+      ( "Goal: Split",
         [
-          test_case "empty goal" `Quick
-            Inference_test.test_split_goal_empty_goal;
+          test_case "empty goal" `Quick Goal_test.test_split_empty_goal;
           test_case "mixed goal entries" `Quick
-            Inference_test.test_split_goal_mixed_goal_entries;
+            Goal_test.test_split_mixed_goal_entries;
         ] );
-      ( "Inference: Solve Goal",
+      ( "Goal: Solve",
         [
           test_case "simple predicates" `Quick
-            Inference_test.test_solve_goal_basic_unification;
-          test_case "no unification" `Quick
-            Inference_test.test_solve_goal_no_unification;
+            Goal_test.test_solve_basic_unification;
+          test_case "no unification" `Quick Goal_test.test_solve_no_unification;
           test_case "multiple unification" `Quick
-            Inference_test.test_solve_goal_multiple_unification;
-          test_case "nested terms" `Quick
-            Inference_test.test_solve_goal_nested_terms;
+            Goal_test.test_solve_multiple_unification;
+          test_case "nested terms" `Quick Goal_test.test_solve_nested_terms;
         ] );
-      ( "Inference: Insert Goals",
+      ( "Goal Table: Insert goals",
         [
-          test_case "solvable" `Quick Inference_test.test_insert_goals_solvable;
+          test_case "solvable" `Quick Goal_table_test.test_insert_goals_solvable;
           test_case "unsolvable" `Quick
-            Inference_test.test_insert_goals_unsolvable;
-          test_case "mixed" `Quick Inference_test.test_insert_goals_mixed;
-          test_case "nested" `Quick Inference_test.test_insert_goals_nested;
+            Goal_table_test.test_insert_goals_unsolvable;
+          test_case "mixed" `Quick Goal_table_test.test_insert_goals_mixed;
+          test_case "nested" `Quick Goal_table_test.test_insert_goals_nested;
         ] );
     ]

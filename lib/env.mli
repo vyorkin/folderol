@@ -14,6 +14,9 @@ type t [@@deriving eq]
 val empty : t
 (** Empty environment with no variable assignments. *)
 
+val mk : (string * Term.t) list -> t
+(** Creates env from a list of bindings [var] -> [term]. *)
+
 val add : t -> string * Term.t -> t
 (** Adds an assignment [var] -> [term] to the environment [env].
 

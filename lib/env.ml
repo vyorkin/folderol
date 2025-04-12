@@ -4,6 +4,7 @@ type t = (string, Term.t, String.comparator_witness) Map.t
 
 let empty = Map.empty (module String)
 let add env (var, term) = Map.add_exn env ~key:var ~data:term
+let mk = List.fold ~init:empty ~f:add
 let find env var = Map.find env var
 
 let pp fmt env =
