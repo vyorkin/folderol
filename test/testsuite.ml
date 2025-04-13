@@ -29,16 +29,22 @@ let () =
           test_case "Pretty-print nested functions" `Quick
             Term_test.test_pp_nested_functions;
         ] );
-      ( "Formula",
+      ( "Formula: Abstract",
         [
           test_case "Abstract simple formula" `Quick
             Formula_test.test_abstract_simple_formula;
           test_case "Abstract nested formula" `Quick
             Formula_test.test_abstract_nested_formula;
+        ] );
+      ( "Formula: Substitute",
+        [
           test_case "Substitute bound var in simple formula" `Quick
             Formula_test.test_subst_bound_var_simple_formula;
           test_case "Substitute bound var in nested formula" `Quick
             Formula_test.test_subst_bound_var_nested_formula;
+        ] );
+      ( "Formula: Accumulate",
+        [
           test_case "Accumulate empty terms" `Quick
             Formula_test.test_accumulate_empty_terms;
           test_case "Accumulate single predicate" `Quick
@@ -49,6 +55,9 @@ let () =
             Formula_test.test_accumulate_deep_quantifier;
           test_case "Accumulate mixed structure" `Quick
             Formula_test.test_accumulate_mixed_structure;
+        ] );
+      ( "Formula: Pretty-print",
+        [
           test_case "Pretty-print conjunction formula" `Quick
             Formula_test.test_pp_conjunction_formula;
           test_case "Pretty-print quantified formula" `Quick
