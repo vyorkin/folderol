@@ -8,11 +8,6 @@ let () =
           test_case "Generate multiple symbols" `Quick
             Symbol_test.test_mk_multiple_symbols;
         ] );
-      ( "Util",
-        [
-          test_case "Accumulate" `Quick Util_test.test_accumulate_sum_numbers;
-          (* test_case "Accumulate" `Quick Util_test.test_whatever1; *)
-        ] );
       ( "Term",
         [
           test_case "Replace in a simple term" `Quick
