@@ -12,7 +12,59 @@ let goal_table_testable = Alcotest.(list goal_testable)
 
 (* accumulate *)
 
-(* TODO: add tests for the accumulate function *)
+let test_accumulate_empty_goal () =
+  let open Formula in
+  let actual = Goal.accumulate (fun acc _ -> acc) ([], [ Pred ("P", []) ]) in
+  let expected = [ Pred ("P", []) ] in
+  Alcotest.(check (list formula_testable))
+    "accumulate: empty goal" expected actual
+
+let test_accumulate_single_goal_entry () =
+  let open Formula in
+  let goal = [ (1, L, Pred ("Q", [ Var "x" ])) ] in
+  let actual = Goal.accumulate (fun acc f -> f :: acc) (goal, []) in
+  Alcotest.(check (list formula_testable))
+    "accumulate: single goal entry"
+    [ Pred ("Q", [ Var "x" ]) ]
+    actual
+
+let test_accumulate_multiple_goal_entries () =
+  let open Formula in
+  let goal =
+    [
+      (2, R, Conn (Conj, [ Pred ("A", []); Pred ("B", []) ]));
+      (1, L, Quant (Forall, "x", Pred ("P", [ Var "x" ])));
+    ]
+  in
+  let actual = Goal.accumulate (fun acc f -> acc @ [ f ]) (goal, []) in
+  let expected =
+    [
+      Conn (Conj, [ Pred ("A", []); Pred ("B", []) ]);
+      Quant (Forall, "x", Pred ("P", [ Var "x" ]));
+    ]
+  in
+  Alcotest.(check (list formula_testable))
+    "accumulate: multiple goal entries" expected actual
+
+let test_accumulate_with_initial_state () =
+  let open Formula in
+  let goal =
+    [
+      (3, R, Conn (Impl, [ Pred ("C", []); Pred ("D", []) ]));
+      (2, L, Pred ("B", [ Function ("f", [ Var "y" ]) ]));
+    ]
+  in
+  let initial = [ Pred ("A", [ Var "z" ]) ] in
+  let actual = Goal.accumulate (fun acc f -> f :: acc) (goal, initial) in
+  let expected =
+    [
+      Pred ("B", [ Function ("f", [ Var "y" ]) ]);
+      Conn (Impl, [ Pred ("C", []); Pred ("D", []) ]);
+      Pred ("A", [ Var "z" ]);
+    ]
+  in
+  Alcotest.(check (list formula_testable))
+    "accumulate: with initial state" expected actual
 
 (* split *)
 

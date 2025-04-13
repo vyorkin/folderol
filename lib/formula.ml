@@ -54,11 +54,11 @@ let add_estimation (side, connective) =
   (cost (side, connective), side, connective)
 
 let rec accumulate f = function
-  | Pred (_, args), init -> List.fold_left args ~init ~f
-  | Conn (_, subformulas), init ->
-      List.fold_left subformulas ~init ~f:(fun acc subformula ->
+  | Pred (_, args), terms -> List.fold_left args ~init:terms ~f
+  | Conn (_, subformulas), terms ->
+      List.fold_left subformulas ~init:terms ~f:(fun acc subformula ->
           accumulate f (subformula, acc))
-  | Quant (_, _, body), init -> accumulate f (body, init)
+  | Quant (_, _, body), terms -> accumulate f (body, terms)
 
 let rec pp_formula fmt = function
   | Pred (name, terms) ->

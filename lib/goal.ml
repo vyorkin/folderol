@@ -49,6 +49,10 @@ let new_goal goal formulas =
 
 let new_goals goal = List.map ~f:(new_goal goal)
 
+let rec accumulate f (goal, formulas) =
+  List.fold_left goal ~init:formulas ~f:(fun acc (_, _, formula) ->
+      f acc formula)
+
 let split goal =
   let open Formula in
   let rec split' (ls, rs) = function

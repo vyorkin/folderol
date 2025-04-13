@@ -172,6 +172,16 @@ let () =
           test_case "nested substitution" `Quick
             Instantiation_test.test_instantiate_goals_nested_substitution;
         ] );
+      ( "Goal: Accumulate",
+        [
+          test_case "empty goal" `Quick Goal_test.test_accumulate_empty_goal;
+          test_case "single goal entry" `Quick
+            Goal_test.test_accumulate_single_goal_entry;
+          test_case "multiple goal entries" `Quick
+            Goal_test.test_accumulate_multiple_goal_entries;
+          test_case "with initial state" `Quick
+            Goal_test.test_accumulate_with_initial_state;
+        ] );
       ( "Goal: Split",
         [
           test_case "empty goal" `Quick Goal_test.test_split_empty_goal;
