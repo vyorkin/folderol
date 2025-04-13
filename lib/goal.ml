@@ -33,12 +33,10 @@ let goal_entry_less_or_eq ((cost0, _, _), (cost1, _, _)) = cost0 <= cost1
 let insert_goal_entry_early = insert_goal_entry ~less:goal_entry_less
 let insert_goal_entry_late = insert_goal_entry ~less:goal_entry_less_or_eq
 
-(* TODO: move to goal.ml *)
 let new_goal goal formulas =
   let estimated_formulas = List.map ~f:Formula.add_estimation formulas in
   Util.accumulate insert_goal_entry_early (estimated_formulas, goal)
 
-(* TODO: move to goal.ml *)
 let new_goals goal = List.map ~f:(new_goal goal)
 
 let rec accumulate f = function
