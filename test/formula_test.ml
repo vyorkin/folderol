@@ -2,6 +2,7 @@ open FolderolLib
 open Term
 open Formula
 
+let term_testable = Alcotest.testable Term.pp Term.equal
 let formula_testable = Alcotest.testable pp equal
 
 (* abstract *)
@@ -68,7 +69,82 @@ let test_subst_bound_var_nested_formula () =
 
 (* accumulate *)
 
-(* TODO: add tests for the accumulate function *)
+let collect_terms formula =
+  let f acc term = term :: acc in
+  accumulate f (formula, []) |> List.rev
+
+let test_accumulate_empty_terms () =
+  let formula =
+    Conn (Disj, [ Pred ("X", []); Quant (Exists, "y", Pred ("Y", [])) ])
+  in
+  let actual = collect_terms formula in
+  let expected = [] in
+  Alcotest.(check (list term_testable))
+    "accumulate: empty terms" expected actual
+
+let test_accumulate_single_predicate () =
+  let formula = Pred ("P", [ Var "x"; Function ("f", [ Var "y" ]) ]) in
+  let actual = collect_terms formula in
+  let expected = [ Var "x"; Function ("f", [ Var "y" ]) ] in
+  Alcotest.(check (list term_testable))
+    "accumulate: single predicate" expected actual
+
+let test_accumulate_nested_connectives () =
+  let formula =
+    Conn
+      ( Conj,
+        [
+          Conn
+            ( Disj,
+              [
+                Pred ("P", [ Function ("g", [ Var "a" ]) ]);
+                Pred ("Q", [ Var "b" ]);
+              ] );
+          Quant (Exists, "x", Pred ("R", [ Var "c" ]));
+        ] )
+  in
+  let actual = collect_terms formula in
+  let expected = [ Function ("g", [ Var "a" ]); Var "b"; Var "c" ] in
+  Alcotest.(check (list term_testable))
+    "accumulate: nested connectives" expected actual
+
+let test_accumulate_deep_quantifier () =
+  let formula =
+    Quant
+      ( Forall,
+        "y",
+        Conn
+          ( Impl,
+            [
+              Pred ("S", [ Var "d" ]);
+              Quant (Exists, "z", Pred ("T", [ Function ("h", [ Var "e" ]) ]));
+            ] ) )
+  in
+  let actual = collect_terms formula in
+  let expected = [ Var "d"; Function ("h", [ Var "e" ]) ] in
+  Alcotest.(check (list term_testable))
+    "accumulate: deep quantifier" expected actual
+
+let test_accumulate_mixed_structure () =
+  let formula =
+    Conn
+      ( Iff,
+        [
+          Quant
+            ( Forall,
+              "x",
+              Conn
+                ( Conj,
+                  [
+                    Pred ("U", [ Var "f"; Function ("k", []) ]); Pred ("V", []);
+                  ] ) );
+          Pred ("W", [ Var "g" ]);
+        ] )
+  in
+  let actual = collect_terms formula in
+  let expected = [ Var "f"; Function ("k", []); Var "g" ] in
+  Alcotest.(check (list term_testable))
+    "accumulate: mixed structure" expected actual
 
 (* pp *)
 

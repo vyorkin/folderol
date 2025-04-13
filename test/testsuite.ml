@@ -39,6 +39,16 @@ let () =
             Formula_test.test_subst_bound_var_simple_formula;
           test_case "Substitute bound var in nested formula" `Quick
             Formula_test.test_subst_bound_var_nested_formula;
+          test_case "Accumulate empty terms" `Quick
+            Formula_test.test_accumulate_empty_terms;
+          test_case "Accumulate single predicate" `Quick
+            Formula_test.test_accumulate_single_predicate;
+          test_case "Accumulate nested connectives" `Quick
+            Formula_test.test_accumulate_nested_connectives;
+          test_case "Accumulate deep quantifier" `Quick
+            Formula_test.test_accumulate_deep_quantifier;
+          test_case "Accumulate mixed structure" `Quick
+            Formula_test.test_accumulate_mixed_structure;
           test_case "Pretty-print conjunction formula" `Quick
             Formula_test.test_pp_conjunction_formula;
           test_case "Pretty-print quantified formula" `Quick
