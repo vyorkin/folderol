@@ -112,7 +112,7 @@ let test_mk_empty_formulas () =
   Alcotest.(check goal_testable)
     "mk: empty formulas leave goal unchanged" goal actual
 
-let test_mk_single_conj_connective () =
+let test_mk_single_formula () =
   (* mk [(P(x)|-)] [(Q∧|-)] -> [(Q∧|-), (P(x)|-)] *)
   let open Formula in
   let initial_predicate = Pred ("P", [ Term.Var "x" ]) in
@@ -128,8 +128,7 @@ let test_mk_single_conj_connective () =
       (* cost=1 for (L, Pred)  *)
     ]
   in
-  Alcotest.(check goal_testable)
-    "mk: inserts single conjunction connective before predicate" expected actual
+  Alcotest.(check goal_testable) "mk: single formula" expected actual
 
 let test_mk_multiple_formulas () =
   let open Formula in
@@ -150,8 +149,7 @@ let test_mk_multiple_formulas () =
       (* cost=3 for (L, Forall) *)
     ]
   in
-  Alcotest.(check goal_testable)
-    "mk: inserts multiple formulas ordered by cost" expected actual
+  Alcotest.(check goal_testable) "mk: multiple formulas" expected actual
 
 (* mk_list *)
 
@@ -169,8 +167,8 @@ let test_mk_list_multiple_goal_sets () =
   let formula_sets =
     [ [ (L, conn_disj) ]; [ (R, quant_exists); (L, conn_not) ] ]
   in
-  let actual = Goal.mk_list initial_goal formula_sets in
-  let expected =
+  let actual_goals = Goal.mk_list initial_goal formula_sets in
+  let expected_goals =
     [
       [
         (1, L, p_b);
@@ -189,7 +187,7 @@ let test_mk_list_multiple_goal_sets () =
     ]
   in
   Alcotest.(check (list goal_testable))
-    "mk_list: processes multiple formula sets" expected actual
+    "mk_list: mutiple goals" expected_goals actual_goals
 
 (* solve *)
 
