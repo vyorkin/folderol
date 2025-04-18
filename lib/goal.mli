@@ -22,11 +22,12 @@ val insert_goal_entry_late : Goal_entry.t * t -> t
 val new_goal : t -> (Formula.side * Formula.t) list -> t
 val new_goals : t -> (Formula.side * Formula.t) list list -> t list
 
-val accumulate :
+val fold_formulas :
   (Formula.t list -> Formula.t -> Formula.t list) ->
   t * Formula.t list ->
   Formula.t list
-(** Accumulates terms from the given formula. *)
+(** Recursively folds over all formulas in the given [goal], accumulating
+    results in [acc]. *)
 
 val split : t -> Formula.t list * Formula.t list
 (** Splits a goal represented as a list of triples [cost * side * Formula.t]

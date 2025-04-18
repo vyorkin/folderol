@@ -67,29 +67,29 @@ let test_subst_bound_var_nested_formula () =
     "subst_bound_var: nested formula" expected
     (subst_bound_var term formula)
 
-(* accumulate *)
+(* fold_terms *)
 
 let collect_terms formula =
   let f acc term = term :: acc in
-  accumulate f (formula, []) |> List.rev
+  fold_terms f (formula, []) |> List.rev
 
-let test_accumulate_empty_terms () =
+let test_fold_terms_empty () =
   let formula =
     Conn (Disj, [ Pred ("X", []); Quant (Exists, "y", Pred ("Y", [])) ])
   in
   let actual = collect_terms formula in
   let expected = [] in
   Alcotest.(check (list term_testable))
-    "accumulate: empty terms" expected actual
+    "fold_terms: empty terms" expected actual
 
-let test_accumulate_single_predicate () =
+let test_fold_terms_in_a_single_predicate () =
   let formula = Pred ("P", [ Var "x"; Function ("f", [ Var "y" ]) ]) in
   let actual = collect_terms formula in
   let expected = [ Var "x"; Function ("f", [ Var "y" ]) ] in
   Alcotest.(check (list term_testable))
-    "accumulate: single predicate" expected actual
+    "fold_terms: single predicate" expected actual
 
-let test_accumulate_nested_connectives () =
+let test_fold_terms_in_nested_connectives () =
   let formula =
     Conn
       ( Conj,
@@ -106,9 +106,9 @@ let test_accumulate_nested_connectives () =
   let actual = collect_terms formula in
   let expected = [ Function ("g", [ Var "a" ]); Var "b"; Var "c" ] in
   Alcotest.(check (list term_testable))
-    "accumulate: nested connectives" expected actual
+    "fold_terms: nested connectives" expected actual
 
-let test_accumulate_deep_quantifier () =
+let test_fold_terms_in_a_deep_quantifier () =
   let formula =
     Quant
       ( Forall,
@@ -123,9 +123,9 @@ let test_accumulate_deep_quantifier () =
   let actual = collect_terms formula in
   let expected = [ Var "d"; Function ("h", [ Var "e" ]) ] in
   Alcotest.(check (list term_testable))
-    "accumulate: deep quantifier" expected actual
+    "fold_terms: deep quantifier" expected actual
 
-let test_accumulate_mixed_structure () =
+let test_fold_terms_in_a_mixed_structure () =
   let formula =
     Conn
       ( Iff,
@@ -144,7 +144,7 @@ let test_accumulate_mixed_structure () =
   let actual = collect_terms formula in
   let expected = [ Var "f"; Function ("k", []); Var "g" ] in
   Alcotest.(check (list term_testable))
-    "accumulate: mixed structure" expected actual
+    "fold_terms: mixed structure" expected actual
 
 (* pp *)
 

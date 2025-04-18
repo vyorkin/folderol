@@ -43,18 +43,17 @@ let () =
           test_case "Substitute bound var in nested formula" `Quick
             Formula_test.test_subst_bound_var_nested_formula;
         ] );
-      ( "Formula: Accumulate",
+      ( "Formula: Fold terms",
         [
-          test_case "Accumulate empty terms" `Quick
-            Formula_test.test_accumulate_empty_terms;
-          test_case "Accumulate single predicate" `Quick
-            Formula_test.test_accumulate_single_predicate;
-          test_case "Accumulate nested connectives" `Quick
-            Formula_test.test_accumulate_nested_connectives;
-          test_case "Accumulate deep quantifier" `Quick
-            Formula_test.test_accumulate_deep_quantifier;
-          test_case "Accumulate mixed structure" `Quick
-            Formula_test.test_accumulate_mixed_structure;
+          test_case "Fold terms empty" `Quick Formula_test.test_fold_terms_empty;
+          test_case "Fold terms in a single predicate" `Quick
+            Formula_test.test_fold_terms_in_a_single_predicate;
+          test_case "Fold terms in nested connectives" `Quick
+            Formula_test.test_fold_terms_in_nested_connectives;
+          test_case "Fold terms in a deep quantifier" `Quick
+            Formula_test.test_fold_terms_in_a_deep_quantifier;
+          test_case "Fold terms a mixed structure" `Quick
+            Formula_test.test_fold_terms_in_a_mixed_structure;
         ] );
       ( "Formula: Pretty-print",
         [
@@ -172,15 +171,17 @@ let () =
           test_case "nested substitution" `Quick
             Instantiation_test.test_instantiate_goals_nested_substitution;
         ] );
-      ( "Goal: Accumulate",
+      ( "Goal: Fold formulas",
         [
-          test_case "empty goal" `Quick Goal_test.test_accumulate_empty_goal;
+          test_case "single goal entry with a single empty predicate" `Quick
+            Goal_test
+            .test_fold_formulas_in_a_single_goal_entry_with_a_single_empty_predicate;
           test_case "single goal entry" `Quick
-            Goal_test.test_accumulate_single_goal_entry;
+            Goal_test.test_fold_formulas_in_a_single_goal_entry;
           test_case "multiple goal entries" `Quick
-            Goal_test.test_accumulate_multiple_goal_entries;
+            Goal_test.test_fold_formulas_in_multiple_goal_entries;
           test_case "with initial state" `Quick
-            Goal_test.test_accumulate_with_initial_state;
+            Goal_test.test_fold_formulas_with_initial_state;
         ] );
       ( "Goal: Split",
         [
@@ -197,7 +198,7 @@ let () =
             Goal_test.test_solve_multiple_unification;
           test_case "nested terms" `Quick Goal_test.test_solve_nested_terms;
         ] );
-      ( "Goal Table: Insert goals",
+      ( "Goal table: Insert goals",
         [
           test_case "solvable" `Quick Goal_table_test.test_insert_goals_solvable;
           test_case "unsolvable" `Quick

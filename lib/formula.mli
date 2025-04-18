@@ -29,9 +29,10 @@ val cost : side * t -> cost
 val add_estimation : side * t -> cost * side * t
 (** Estimates formula cost and attaches it. *)
 
-val accumulate :
+val fold_terms :
   (Term.t list -> Term.t -> Term.t list) -> t * Term.t list -> Term.t list
-(** Accumulates terms from the given formula. *)
+(** Recursively folds over all terms in the given [formula], accumulating
+    results in [acc]. *)
 
 val pp_formula : Format.formatter -> t -> unit
 (** Prints a formula using the given [fmt] formatter.

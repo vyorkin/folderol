@@ -10,25 +10,26 @@ let goal_entry_testable = Alcotest.(triple int side_testable formula_testable)
 let goal_testable = Alcotest.(list goal_entry_testable)
 let goal_table_testable = Alcotest.(list goal_testable)
 
-(* accumulate *)
+(* fold_formulas *)
 
-let test_accumulate_empty_goal () =
+let test_fold_formulas_in_a_single_goal_entry_with_a_single_empty_predicate () =
   let open Formula in
-  let actual = Goal.accumulate (fun acc _ -> acc) ([], [ Pred ("P", []) ]) in
+  let actual = Goal.fold_formulas (fun acc _ -> acc) ([], [ Pred ("P", []) ]) in
   let expected = [ Pred ("P", []) ] in
   Alcotest.(check (list formula_testable))
-    "accumulate: empty goal" expected actual
+    "fold_formulas: single goal entry with a single empty predicate" expected
+    actual
 
-let test_accumulate_single_goal_entry () =
+let test_fold_formulas_in_a_single_goal_entry () =
   let open Formula in
   let goal = [ (1, L, Pred ("Q", [ Var "x" ])) ] in
-  let actual = Goal.accumulate (fun acc f -> f :: acc) (goal, []) in
+  let actual = Goal.fold_formulas (fun acc f -> f :: acc) (goal, []) in
   Alcotest.(check (list formula_testable))
-    "accumulate: single goal entry"
+    "fold_formulas: single goal entry"
     [ Pred ("Q", [ Var "x" ]) ]
     actual
 
-let test_accumulate_multiple_goal_entries () =
+let test_fold_formulas_in_multiple_goal_entries () =
   let open Formula in
   let goal =
     [
@@ -36,7 +37,7 @@ let test_accumulate_multiple_goal_entries () =
       (1, L, Quant (Forall, "x", Pred ("P", [ Var "x" ])));
     ]
   in
-  let actual = Goal.accumulate (fun acc f -> acc @ [ f ]) (goal, []) in
+  let actual = Goal.fold_formulas (fun acc f -> acc @ [ f ]) (goal, []) in
   let expected =
     [
       Conn (Conj, [ Pred ("A", []); Pred ("B", []) ]);
@@ -44,9 +45,9 @@ let test_accumulate_multiple_goal_entries () =
     ]
   in
   Alcotest.(check (list formula_testable))
-    "accumulate: multiple goal entries" expected actual
+    "fold_formulas: multiple goal entries" expected actual
 
-let test_accumulate_with_initial_state () =
+let test_fold_formulas_with_initial_state () =
   let open Formula in
   let goal =
     [
@@ -55,7 +56,7 @@ let test_accumulate_with_initial_state () =
     ]
   in
   let initial = [ Pred ("A", [ Var "z" ]) ] in
-  let actual = Goal.accumulate (fun acc f -> f :: acc) (goal, initial) in
+  let actual = Goal.fold_formulas (fun acc f -> f :: acc) (goal, initial) in
   let expected =
     [
       Pred ("B", [ Function ("f", [ Var "y" ]) ]);
@@ -64,7 +65,7 @@ let test_accumulate_with_initial_state () =
     ]
   in
   Alcotest.(check (list formula_testable))
-    "accumulate: with initial state" expected actual
+    "fold_formulas: with initial state" expected actual
 
 (* split *)
 

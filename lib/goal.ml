@@ -49,7 +49,7 @@ let new_goal goal formulas =
 
 let new_goals goal = List.map ~f:(new_goal goal)
 
-let rec accumulate f (goal, formulas) =
+let rec fold_formulas f (goal, formulas) =
   List.fold_left goal ~init:formulas ~f:(fun acc (_, _, formula) ->
       f acc formula)
 
