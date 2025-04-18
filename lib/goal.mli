@@ -1,11 +1,17 @@
 open Unification
 
+type sided_formula = Formula.side * Formula.t
+(** Aka "sequent component". Represents a single formula in either the
+    antecedent (left) or succedent (right) of a sequent Γ ⊢ Δ. *)
+
 type t = Goal_entry.t list
+(** A goal is a list of [Goal_entry.t], each is basically a triple
+    [cost * side * formula]. *)
 
 val insert_goal_entry :
   less:(Goal_entry.t * Goal_entry.t -> bool) -> Goal_entry.t * t -> t
 (** The entries in a goal are ordered by cost - the first entry is the cheapest.
-    This function helps to maintain goal_entry's in order.
+    This function helps to maintain goal entry's in order.
 
     @param less
       Comparison function: [<] to place the new entry first among entries of
@@ -19,8 +25,19 @@ val insert_goal_entry_late : Goal_entry.t * t -> t
 (** Inserts a new [goal_entry] by placing it at the end of entries of equal
     cost. *)
 
-val mk : t -> (Formula.side * Formula.t) list -> t
-val mk_list : t -> (Formula.side * Formula.t) list list -> t list
+val mk : t -> sided_formula list -> t
+(** A rule is applied to the head of this list. The tail holds the remaining
+    formulas, which must be included in each subgoal. Each subgoal is made from
+    the tail by adding new sequent components: pairs of type [side * formula].
+
+    Calling [Goal.mk goal sided_formulas] copies the pairs (sequent components)
+    into goal, which is the tail of the goal. It calls [add_estimation] to
+    attach a cost to each formula/sequent component. *)
+
+val mk_list : t -> sided_formula list list -> t list
+(** Since a rule may produce more than one subgoal, this [Goal.mk_list] function
+    creates a list of subgoals from a goal and a list of new [side * formula]
+    pairs. *)
 
 val fold_formulas :
   (Formula.t list -> Formula.t -> Formula.t list) ->

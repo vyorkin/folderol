@@ -14,7 +14,7 @@ type t =
           printing) and the body. *)
 [@@deriving eq, show]
 
-(** Γ |- ∆ *)
+(** Γ |- ∆, where Γ and Δ are finite sets of formulas. *)
 type side = L | R [@@deriving eq, show]
 
 type cost = int [@@deriving eq, show]

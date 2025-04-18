@@ -1,2 +1,3 @@
-type t = Formula.cost * Formula.side * Formula.t
-[@@deriving eq, show { with_path = false }]
+open Formula
+
+type t = cost * side * Formula.t [@@deriving eq, show { with_path = false }]

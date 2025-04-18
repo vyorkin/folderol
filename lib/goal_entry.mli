@@ -1,1 +1,3 @@
-type t = Formula.cost * Formula.side * Formula.t [@@deriving eq, show]
+open Formula
+
+type t = cost * side * Formula.t [@@deriving eq, show]

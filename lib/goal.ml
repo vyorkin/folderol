@@ -1,5 +1,6 @@
 module List = Core.List
 
+type sided_formula = Formula.side * Formula.t
 type t = Goal_entry.t list
 
 let unify env (f1, f2) = Unification.unify env (f1, f2) |> Result.to_option
@@ -47,8 +48,8 @@ let goal_entry_less_or_eq ((cost0, _, _), (cost1, _, _)) = cost0 <= cost1
 let insert_goal_entry_early = insert_goal_entry ~less:goal_entry_less
 let insert_goal_entry_late = insert_goal_entry ~less:goal_entry_less_or_eq
 
-let mk goal formulas =
-  formulas
+let mk goal sided_formulas =
+  sided_formulas
   |> List.map ~f:Formula.add_estimation
   |> List.fold_left ~init:goal ~f:(fun acc formula ->
          insert_goal_entry_early (formula, acc))
