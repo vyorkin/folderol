@@ -6,20 +6,26 @@ let unify env (f1, f2) = Unification.unify env (f1, f2) |> Result.to_option
 
 (* insert 1 into [1, 3, 0, 1]:
           ^       ^
-          y       x
+          x       y
 
-   [<, 1]: insert_late
+   [<, 1]: insert_early
+       ^
+       y
+
     match 1, 1 :: 3 :: 0 :: 1 ->
     if 1 <  1 then 1 :: insert (<) (1, 3 :: 0 :: 1) else 1 :: 1 :: 3 :: 0 :: 1
-                   ^                ^                    ^    ^
-                   y                x                    x    y
+       ^    ^      ^                ^                    ^    ^
+       y <  x      y                x                    x    y
                                                         \--------------------/
 
-   [<=, 1]: insert_early
+   [<=, 1]: insert_late
+        ^
+        y
+
     match 1, 1 :: 3 :: 0 :: 1 ->
-    if 1 <= 1 then 1 :: insert (<) (1, 3 :: 0 :: 1) else 1 :: 1 :: 3 :: 0 :: 1
-                   ^                ^                    ^    ^
-                   y                x                    x    y
+    if 1 <= 1 then 1 :: insert (<=) (1, 3 :: 0 :: 1) else 1 :: 1 :: 3 :: 0 :: 1
+       ^    ^      ^                 ^                    ^    ^
+       y <= x      y                 x                    x    y
                   \-------------------------------/
    *)
 
@@ -41,13 +47,13 @@ let goal_entry_less_or_eq ((cost0, _, _), (cost1, _, _)) = cost0 <= cost1
 let insert_goal_entry_early = insert_goal_entry ~less:goal_entry_less
 let insert_goal_entry_late = insert_goal_entry ~less:goal_entry_less_or_eq
 
-let new_goal goal formulas =
+let mk goal formulas =
   formulas
   |> List.map ~f:Formula.add_estimation
   |> List.fold_left ~init:goal ~f:(fun acc formula ->
          insert_goal_entry_early (formula, acc))
 
-let new_goals goal = List.map ~f:(new_goal goal)
+let mk_list goal = List.map ~f:(mk goal)
 
 let rec fold_formulas f (goal, formulas) =
   List.fold_left goal ~init:formulas ~f:(fun acc (_, _, formula) ->

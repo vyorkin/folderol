@@ -19,8 +19,8 @@ val insert_goal_entry_late : Goal_entry.t * t -> t
 (** Inserts a new [goal_entry] by placing it at the end of entries of equal
     cost. *)
 
-val new_goal : t -> (Formula.side * Formula.t) list -> t
-val new_goals : t -> (Formula.side * Formula.t) list list -> t list
+val mk : t -> (Formula.side * Formula.t) list -> t
+val mk_list : t -> (Formula.side * Formula.t) list list -> t list
 
 val fold_formulas :
   (Formula.t list -> Formula.t -> Formula.t list) ->

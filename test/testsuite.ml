@@ -189,6 +189,20 @@ let () =
           test_case "mixed goal entries" `Quick
             Goal_test.test_split_mixed_goal_entries;
         ] );
+      ( "Goal: Mk",
+        [
+          test_case "empty formulas" `Quick Goal_test.test_mk_empty_formulas;
+          test_case "inserts single conjunction connective before predicate"
+            `Quick Goal_test.test_mk_single_conj_connective;
+          test_case "inserts multiple formulas ordered by cost" `Quick
+            Goal_test.test_mk_multiple_formulas;
+        ] );
+      ( "Goal: Mk list",
+        [
+          test_case "empty input" `Quick Goal_test.test_mk_list_empty_input;
+          test_case "inserts multiple goal sets in correct order" `Quick
+            Goal_test.test_mk_list_multiple_goal_sets;
+        ] );
       ( "Goal: Solve",
         [
           test_case "simple predicates" `Quick

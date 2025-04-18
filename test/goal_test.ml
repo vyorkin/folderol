@@ -103,6 +103,94 @@ let test_split_mixed_goal_entries () =
     [ Pred ("Q", [ Term.Var "y" ]); Pred ("S", [ Term.Var "w" ]) ]
     rs
 
+(* mk *)
+
+let test_mk_empty_formulas () =
+  let open Formula in
+  let goal = [ (1, L, Pred ("P", [ Term.Var "x" ])) ] in
+  let actual = Goal.mk goal [] in
+  Alcotest.(check goal_testable)
+    "mk: empty formulas leave goal unchanged" goal actual
+
+let test_mk_single_conj_connective () =
+  (* mk [(P(x)|-)] [(Q∧|-)] -> [(Q∧|-), (P(x)|-)] *)
+  let open Formula in
+  let initial_predicate = Pred ("P", [ Term.Var "x" ]) in
+  let initial_goal = [ (1, L, initial_predicate) ] in
+  let new_conn_conj = Conn (Conj, [ Pred ("Q", []) ]) in
+  let formulas = [ (L, new_conn_conj) ] in
+  let actual = Goal.mk initial_goal formulas in
+  let expected =
+    [
+      (1, L, new_conn_conj);
+      (* cost=1 for (L, Conj) - 1 subgoal *)
+      (1, L, initial_predicate);
+      (* cost=1 for (L, Pred)  *)
+    ]
+  in
+  Alcotest.(check goal_testable)
+    "mk: inserts single conjunction connective before predicate" expected actual
+
+let test_mk_multiple_formulas () =
+  let open Formula in
+  let open Term in
+  let p_x = Pred ("P", [ Var "x" ]) in
+  let initial_goal = [ (1, L, p_x) ] in
+  let conn_impl = Conn (Impl, [ Pred ("A", []); Pred ("B", []) ]) in
+  let quant_forall = Quant (Forall, "y", Pred ("Q", [ Var "y" ])) in
+  let formulas = [ (R, conn_impl); (L, quant_forall) ] in
+  let actual = Goal.mk initial_goal formulas in
+  let expected =
+    [
+      (1, R, conn_impl);
+      (* cost=1 for (R, Impl) *)
+      (1, L, p_x);
+      (* cost=1 for (L, Pred)  *)
+      (3, L, quant_forall);
+      (* cost=3 for (L, Forall) *)
+    ]
+  in
+  Alcotest.(check goal_testable)
+    "mk: inserts multiple formulas ordered by cost" expected actual
+
+(* mk_list *)
+
+let test_mk_list_empty_input () =
+  let actual = Goal.mk_list [] [] in
+  Alcotest.(check (list goal_testable)) "mk_list: empty input" [] actual
+
+let test_mk_list_multiple_goal_sets () =
+  let open Formula in
+  let p_b = Pred ("B", []) in
+  let initial_goal = [ (1, L, p_b) ] in
+  let conn_disj = Conn (Disj, [ Pred ("X", []); Pred ("Y", []) ]) in
+  let quant_exists = Quant (Exists, "z", Pred ("R", [ Term.Var "z" ])) in
+  let conn_not = Conn (Not, [ Pred ("S", []) ]) in
+  let formula_sets =
+    [ [ (L, conn_disj) ]; [ (R, quant_exists); (L, conn_not) ] ]
+  in
+  let actual = Goal.mk_list initial_goal formula_sets in
+  let expected =
+    [
+      [
+        (1, L, p_b);
+        (* cost=1 for (L, Pred)  *)
+        (2, L, conn_disj);
+        (* cost=2 for (L, Disj) - 2 subgoals *)
+      ];
+      [
+        (1, L, conn_not);
+        (* cost=1 for (L, Not) - 1 subgoal *)
+        (1, L, p_b);
+        (* cost=1 for (L, Pred)  *)
+        (3, R, quant_exists);
+        (* cost=3 for (R, Exists) *)
+      ];
+    ]
+  in
+  Alcotest.(check (list goal_testable))
+    "mk_list: processes multiple formula sets" expected actual
+
 (* solve *)
 
 let test_solve_basic_unification () =
@@ -115,7 +203,7 @@ let test_solve_basic_unification () =
   in
   let result = Goal.solve goal in
   let expected_unifier = Env.mk [ ("x", Bound 42) ] in
-  let expected = [ (Formula.Pred ("P", [ Var "x" ]), expected_unifier) ] in
+  let expected = [ (Pred ("P", [ Var "x" ]), expected_unifier) ] in
   Alcotest.(check (list (pair formula_testable env_testable)))
     "solve: unifies simple predicates" expected result
 
