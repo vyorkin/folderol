@@ -81,4 +81,5 @@ val solve : t -> (Formula.t * unifier) list
     unifier is identified. *)
 
 val reduce : t -> Formula.side * Formula.t -> t
-(** Reduces goal. *)
+(** Handles all the rules. Given a formula and its side (left or right), it uses
+    the immediate subformulas to build subgoals. *)

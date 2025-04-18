@@ -87,5 +87,16 @@ let solve goal =
   in
   solve' (lps, rps)
 
+(** For rules [\forall R] and [\exists L] it generates a fresh parameter and
+    attaches all the variables in the goal.
+
+    For rules [\forall L] and [\exists R] it generates a fresh variable. The
+    subgoal contains the original entry inserted "late" and the new entry
+    inserted "early".
+
+    @raise Error
+      If not reductions are possible, indicating that all formulas are atomic.
+*)
+
 let reduce goal formula = failwith "hooy"
 (*   let goals = new_goals g in *)
