@@ -56,6 +56,12 @@ let mk goal sided_formulas =
 
 let mk_list goal = List.map ~f:(mk goal)
 
+(* SML version from the folderol paper *)
+
+(* fun accum_goal f ([], bs) = bs *)
+(*   | accum_goal f ((_,_,A)::G, bs) = accum_goal f (G, f(A,bs)); *)
+
+(* [accum_goal] in the original paper *)
 let rec fold_formulas f (goal, formulas) =
   List.fold_left goal ~init:formulas ~f:(fun acc (_, _, formula) ->
       f acc formula)

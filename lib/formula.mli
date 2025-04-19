@@ -31,7 +31,7 @@ val add_estimation : side * t -> cost * side * t
 (** Estimates formula cost and attaches it. *)
 
 val fold_terms : f:('a -> Term.t -> 'a) -> t * 'a -> 'a
-(** Named [accum_form] in original paper. Recursively folds over all terms. *)
+(** Recursively folds over all terms. Named [accum_form] in original paper. *)
 
 val pp_formula : Format.formatter -> t -> unit
 (** Prints a formula using the given [fmt] formatter.

@@ -45,7 +45,8 @@ val fold_formulas :
   (Formula.t list -> Formula.t -> Formula.t list) ->
   t * Formula.t list ->
   Formula.t list
-(** Recursively folds over all formulas. *)
+(** Recursively folds over all formulas. Named [accum_goal] in the original
+    paper. *)
 
 val split : t -> Formula.t list * Formula.t list
 (** Splits a goal represented as a list of triples [cost * side * Formula.t]

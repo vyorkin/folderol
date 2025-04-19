@@ -54,6 +54,16 @@ let add_estimation (side, connective) =
   let cost = estimate (side, connective) in
   (cost, side, connective)
 
+(* SML version from the folderol paper *)
+
+(* fun accumulate f ([], y)    = y *)
+(*   | accumulate f (x::xs, y) = accumulate f (xs, f(x,y)) *)
+
+(* fun accum_form f (Pred(_,ts), bs)   = accumulate f (ts, bs) *)
+(*   | accum_form f (Conn(_,As), bs)   = accumulate (accum_form f) (As, bs) *)
+(*   | accum_form f (Quant(_,_,A), bs) = accum_form f (A,bs); *)
+
+(* [accum_form] in the original paper *)
 let rec fold_terms ~f = function
   | Pred (_, args), terms_acc -> List.fold_left args ~init:terms_acc ~f
   | Conn (_, subformulas), terms_acc ->

@@ -37,11 +37,11 @@ let test_fold_formulas_in_multiple_goal_entries () =
       (1, L, Quant (Forall, "x", Pred ("P", [ Var "x" ])));
     ]
   in
-  let actual = Goal.fold_formulas (fun acc f -> acc @ [ f ]) (goal, []) in
+  let actual = Goal.fold_formulas (fun acc f -> f :: acc) (goal, []) in
   let expected =
     [
-      Conn (Conj, [ Pred ("A", []); Pred ("B", []) ]);
       Quant (Forall, "x", Pred ("P", [ Var "x" ]));
+      Conn (Conj, [ Pred ("A", []); Pred ("B", []) ]);
     ]
   in
   Alcotest.(check (list formula_testable))
