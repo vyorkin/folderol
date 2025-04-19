@@ -254,3 +254,5 @@ let test_solve_nested_terms () =
   in
   Alcotest.(check (list (pair formula_testable env_testable)))
     "solve: works with nested terms" expected result
+
+let test_reduce_whatever () = failwith "ebis konem"

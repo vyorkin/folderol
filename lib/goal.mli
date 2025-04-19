@@ -39,12 +39,8 @@ val mk_list : t -> sided_formula list list -> t list
     creates a list of subgoals from a goal and a list of new [side * formula]
     pairs. *)
 
-val fold_formulas :
-  (Formula.t list -> Formula.t -> Formula.t list) ->
-  t * Formula.t list ->
-  Formula.t list
-(** Recursively folds over all formulas in the given [goal], accumulating
-    results in [acc]. *)
+val fold_formulas : ('a -> 'b -> 'a) -> ('c * 'd * 'b) list * 'a -> 'a
+(** Recursively folds over all formulas. *)
 
 val split : t -> Formula.t list * Formula.t list
 (** Splits a goal represented as a list of triples [cost * side * Formula.t]
@@ -80,6 +76,6 @@ val solve : t -> (Formula.t * unifier) list
     The function prioritizes finding the first solution, returning as soon as a
     unifier is identified. *)
 
-val reduce : t -> Formula.side * Formula.t -> t
+val reduce : t -> sided_formula -> t
 (** Handles all the rules. Given a formula and its side (left or right), it uses
     the immediate subformulas to build subgoals. *)

@@ -18,6 +18,7 @@ type t =
 type side = L | R [@@deriving eq, show]
 
 type cost = int [@@deriving eq, show]
+(** Cost of the rule. *)
 
 val is_pred : t -> bool
 (** Returns [true] if formula is a predicate. *)
@@ -29,10 +30,8 @@ val cost : side * t -> cost
 val add_estimation : side * t -> cost * side * t
 (** Estimates formula cost and attaches it. *)
 
-val fold_terms :
-  (Term.t list -> Term.t -> Term.t list) -> t * Term.t list -> Term.t list
-(** Recursively folds over all terms in the given [formula], accumulating
-    results in [acc]. *)
+val fold_terms : ('a -> Term.t -> 'a) -> t * 'a -> 'a
+(** Recursively folds over all terms. *)
 
 val pp_formula : Format.formatter -> t -> unit
 (** Prints a formula using the given [fmt] formatter.
@@ -51,3 +50,5 @@ val abstract : Term.t -> t -> t
 
 val subst_bound_var : Term.t -> t -> t
 (** Replaces occurences of a bound variable by [Term.t]. *)
+
+(* val variable_names :  *)

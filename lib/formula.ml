@@ -54,9 +54,9 @@ let add_estimation (side, connective) =
   (cost (side, connective), side, connective)
 
 let rec fold_terms f = function
-  | Pred (_, args), terms -> List.fold_left args ~init:terms ~f
-  | Conn (_, subformulas), terms ->
-      List.fold_left subformulas ~init:terms ~f:(fun acc subformula ->
+  | Pred (_, args), terms_acc -> List.fold_left args ~init:terms_acc ~f
+  | Conn (_, subformulas), terms_acc ->
+      List.fold_left subformulas ~init:terms_acc ~f:(fun acc subformula ->
           fold_terms f (subformula, acc))
   | Quant (_, _, body), terms -> fold_terms f (body, terms)
 

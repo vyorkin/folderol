@@ -98,5 +98,7 @@ let solve goal =
       If not reductions are possible, indicating that all formulas are atomic.
 *)
 
-let reduce goal formula = failwith "hooy"
-(*   let goals = new_goals g in *)
+let reduce goal sideed_formula =
+  let mk_goals = mk_list goal in
+  (* let vars_in  *)
+  failwith "blya"

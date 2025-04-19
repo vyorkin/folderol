@@ -211,6 +211,8 @@ let () =
             Goal_test.test_solve_multiple_unification;
           test_case "nested terms" `Quick Goal_test.test_solve_nested_terms;
         ] );
+      ( "Goal: reduce",
+        [ test_case "whatever" `Quick Goal_test.test_reduce_whatever ] );
       ( "Goal table: Insert goals",
         [
           test_case "solvable" `Quick Goal_table_test.test_insert_goals_solvable;
