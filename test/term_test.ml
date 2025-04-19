@@ -3,6 +3,39 @@ open Term
 
 let term_testable = Alcotest.testable pp equal
 
+(* variable_names *)
+
+let test_variable_names_empty () =
+  let actual = variable_names [] (Var "x") in
+  Alcotest.(check (list string)) "empty initial" [ "x" ] actual
+
+let test_variable_names_existing () =
+  let actual = variable_names [ "y" ] (Var "y") in
+  Alcotest.(check (list string)) "existing variable" [ "y" ] actual
+
+let test_variable_names_nested () =
+  let term =
+    Function ("f", [ Var "a"; Function ("g", [ Var "b"; Var "a" ]) ])
+  in
+  let actual = variable_names [] term in
+  Alcotest.(check (list string)) "nested functions" [ "b"; "a" ] actual
+
+let test_variable_names_mixed () =
+  let term =
+    Function ("h", [ Bound 0; Var "y"; Function ("i", [ Var "z"; Var "x" ]) ])
+  in
+  let actual = variable_names [ "z" ] term in
+  Alcotest.(check (list string)) "mixed terms" [ "x"; "y"; "z" ] actual
+
+let test_variable_names_const () =
+  let actual = variable_names [ "a" ] (Function ("c", [])) in
+  Alcotest.(check (list string)) "constant term" [ "a" ] actual
+
+let test_variable_names_dups () =
+  let term = Function ("f", [ Var "x"; Var "x"; Var "y"; Var "x" ]) in
+  let actual = variable_names [] term in
+  Alcotest.(check (list string)) "duplicates" [ "y"; "x" ] actual
+
 (* replace *)
 
 let test_replace_in_simple_term () =

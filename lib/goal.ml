@@ -98,7 +98,9 @@ let solve goal =
       If not reductions are possible, indicating that all formulas are atomic.
 *)
 
-let reduce goal sideed_formula =
-  let mk_goals = mk_list goal in
+let reduce goal _sideed_formula =
+  let _mk_goals = mk_list goal in
   (* let vars_in  *)
   failwith "blya"
+
+(* let variable_names = fold_formulas Formula.variable_names *)

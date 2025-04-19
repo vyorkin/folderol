@@ -23,15 +23,15 @@ type cost = int [@@deriving eq, show]
 val is_pred : t -> bool
 (** Returns [true] if formula is a predicate. *)
 
-val cost : side * t -> cost
+val estimate : side * t -> cost
 (** Cost of ∀L and ∃R is 3. The cost of other rules is the number of premises.
 *)
 
 val add_estimation : side * t -> cost * side * t
 (** Estimates formula cost and attaches it. *)
 
-val fold_terms : ('a -> Term.t -> 'a) -> t * 'a -> 'a
-(** Recursively folds over all terms. *)
+val fold_terms : f:('a -> Term.t -> 'a) -> t * 'a -> 'a
+(** Named [accum_form] in original paper. Recursively folds over all terms. *)
 
 val pp_formula : Format.formatter -> t -> unit
 (** Prints a formula using the given [fmt] formatter.
@@ -51,4 +51,5 @@ val abstract : Term.t -> t -> t
 val subst_bound_var : Term.t -> t -> t
 (** Replaces occurences of a bound variable by [Term.t]. *)
 
-(* val variable_names :  *)
+(* val fold_variable_names : t * string list -> string list *)
+(** Named [vars_in_form] in the original paper. *)

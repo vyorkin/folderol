@@ -30,7 +30,7 @@ type cost = int [@@deriving eq, show { with_path = false }]
 
 let is_pred = function Pred _ -> true | _ -> false
 
-let cost (side, connective) =
+let estimate (side, connective) =
   match (side, connective) with
   (* 1 subgoal *)
   | _, Conn (Not, _) -> 1
@@ -45,20 +45,21 @@ let cost (side, connective) =
   | L, Conn (Impl, _) -> 2
   | _, Conn (Iff, _) -> 2
   (* quantifier expansion *)
-  | L, Quant (Forall, _, _) -> 3
-  | R, Quant (Exists, _, _) -> 3
+  | L, Quant (Forall, _, _) -> 3 (* ∀L *)
+  | R, Quant (Exists, _, _) -> 3 (* ∃R *)
   (* no reductions *)
   | _, _ -> 4
 
 let add_estimation (side, connective) =
-  (cost (side, connective), side, connective)
+  let cost = estimate (side, connective) in
+  (cost, side, connective)
 
-let rec fold_terms f = function
+let rec fold_terms ~f = function
   | Pred (_, args), terms_acc -> List.fold_left args ~init:terms_acc ~f
   | Conn (_, subformulas), terms_acc ->
       List.fold_left subformulas ~init:terms_acc ~f:(fun acc subformula ->
-          fold_terms f (subformula, acc))
-  | Quant (_, _, body), terms -> fold_terms f (body, terms)
+          fold_terms ~f (subformula, acc))
+  | Quant (_, _, body), terms -> fold_terms ~f (body, terms)
 
 let rec pp_formula fmt = function
   | Pred (name, terms) ->
@@ -113,3 +114,5 @@ let subst_bound_var term formula =
         Quant (quantifier, var_name, subst (ix + 1) body)
   in
   subst 0 formula
+
+(* let variable_names = fold_terms Term.variable_names *)

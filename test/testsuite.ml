@@ -8,7 +8,20 @@ let () =
           test_case "Generate multiple symbols" `Quick
             Symbol_test.test_mk_multiple_symbols;
         ] );
-      ( "Term",
+      ( "Term: Variable names",
+        [
+          test_case "Initial list is empty" `Quick
+            Term_test.test_variable_names_empty;
+          test_case "Existing initial duplicate variable name" `Quick
+            Term_test.test_variable_names_existing;
+          test_case "Nested " `Quick Term_test.test_variable_names_nested;
+          test_case "Mixed variables" `Quick Term_test.test_variable_names_mixed;
+          test_case "Single initial var, no vars inside term" `Quick
+            Term_test.test_variable_names_const;
+          test_case "Multiple variable names" `Quick
+            Term_test.test_variable_names_dups;
+        ] );
+      ( "Term: Replace",
         [
           test_case "Replace in a simple term" `Quick
             Term_test.test_replace_in_simple_term;
@@ -18,6 +31,9 @@ let () =
             Term_test.test_replace_does_not_modify_unmatched_terms;
           test_case "Replace in a deeply nested function" `Quick
             Term_test.test_replace_in_deeply_nested_function;
+        ] );
+      ( "Term: Pretty-print",
+        [
           test_case "Pretty-print variable" `Quick Term_test.test_pp_variable;
           test_case "Pretty-print parameter" `Quick Term_test.test_pp_parameter;
           test_case "Pretty-print bound variable" `Quick
