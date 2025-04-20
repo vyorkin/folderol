@@ -30,7 +30,7 @@ val estimate : side * t -> cost
 val add_estimation : side * t -> cost * side * t
 (** Estimates formula cost and attaches it. *)
 
-val fold_terms : f:('a -> Term.t -> 'a) -> t * 'a -> 'a
+val fold_terms : f:('a -> Term.t -> 'a) -> 'a -> t -> 'a
 (** Recursively folds over all terms. Named [accum_form] in original paper. *)
 
 val pp_formula : Format.formatter -> t -> unit
@@ -51,5 +51,5 @@ val abstract : Term.t -> t -> t
 val subst_bound_var : Term.t -> t -> t
 (** Replaces occurences of a bound variable by [Term.t]. *)
 
-(* val fold_variable_names : t * string list -> string list *)
+val variable_names : string list -> t -> string list
 (** Named [vars_in_form] in the original paper. *)

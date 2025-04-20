@@ -189,15 +189,15 @@ let () =
         ] );
       ( "Goal: Fold formulas",
         [
-          test_case "single goal entry with a single empty predicate" `Quick
+          test_case "empty goal and single initial formula" `Quick
+            Goal_test.test_fold_formulas_empty_goal;
+          test_case "goal with a single entry and empty formulas" `Quick
+            Goal_test.test_fold_formulas_goal_with_a_single_entry;
+          test_case "goal with multiple entries and empty formulas" `Quick
+            Goal_test.test_fold_formulas_goal_with_multiple_entries;
+          test_case "initial formulas and a goal with multiple entries" `Quick
             Goal_test
-            .test_fold_formulas_in_a_single_goal_entry_with_a_single_empty_predicate;
-          test_case "single goal entry" `Quick
-            Goal_test.test_fold_formulas_in_a_single_goal_entry;
-          test_case "multiple goal entries" `Quick
-            Goal_test.test_fold_formulas_in_multiple_goal_entries;
-          test_case "with initial state" `Quick
-            Goal_test.test_fold_formulas_with_initial_state;
+            .test_fold_formulas_goal_with_multiple_entries_and_initial_formulas;
         ] );
       ( "Goal: Split",
         [

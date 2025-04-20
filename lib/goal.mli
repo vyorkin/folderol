@@ -39,12 +39,7 @@ val mk_list : t -> sided_formula list list -> t list
     creates a list of subgoals from a goal and a list of new [side * formula]
     pairs. *)
 
-(* val fold_formulas : ('a -> 'b -> 'a) -> ('c * 'd * 'b) list * 'a -> 'a *)
-
-val fold_formulas :
-  (Formula.t list -> Formula.t -> Formula.t list) ->
-  t * Formula.t list ->
-  Formula.t list
+val fold_formulas : f:('a -> Formula.t -> 'a) -> 'a -> t -> 'a
 (** Recursively folds over all formulas. Named [accum_goal] in the original
     paper. *)
 
@@ -86,4 +81,4 @@ val reduce : t -> sided_formula -> t
 (** Handles all the rules. Given a formula and its side (left or right), it uses
     the immediate subformulas to build subgoals. *)
 
-(* val variable_names : t * string list -> string list *)
+val variable_names : string list -> t -> string list

@@ -71,7 +71,7 @@ let test_subst_bound_var_nested_formula () =
 
 let collect_terms formula =
   let f acc term = term :: acc in
-  fold_terms ~f (formula, []) |> List.rev
+  fold_terms ~f [] formula |> List.rev
 
 let test_fold_terms_empty () =
   let formula =
