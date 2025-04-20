@@ -54,6 +54,8 @@ let mk goal sided_formulas =
   |> List.fold_left ~init:goal ~f:(fun acc formula ->
          insert_goal_entry_early (formula, acc))
 
+(** Creates a list of subgoals from a goal (list of tuples
+    [cost * side * formula]) and a list of new pairs [side * formula]. *)
 let mk_list goal = List.map ~f:(mk goal)
 
 (* SML version from the folderol paper *)
@@ -103,10 +105,10 @@ let solve goal =
       If not reductions are possible, indicating that all formulas are atomic.
 *)
 
-let reduce goal _sideed_formula =
+let variable_names ~init =
+  fold_formulas ~f:(fun acc f -> Formula.variable_names ~init:acc f) ~init
+
+let reduce goal _sided_formula =
   let _mk_goals = mk_list goal in
   (* let vars_in  *)
   failwith "blya"
-
-let variable_names ~init =
-  fold_formulas ~f:(fun acc f -> Formula.variable_names ~init:acc f) ~init

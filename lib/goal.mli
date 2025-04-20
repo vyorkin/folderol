@@ -77,9 +77,9 @@ val solve : t -> (Formula.t * unifier) list
     The function prioritizes finding the first solution, returning as soon as a
     unifier is identified. *)
 
+val variable_names : init:string list -> t -> string list
+(** Named [vars_in_goal] in the original paper. *)
+
 val reduce : t -> sided_formula -> t
 (** Handles all the rules. Given a formula and its side (left or right), it uses
     the immediate subformulas to build subgoals. *)
-
-val variable_names : init:string list -> t -> string list
-(** Named [vars_in_goal] in the original paper. *)
