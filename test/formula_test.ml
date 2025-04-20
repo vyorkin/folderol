@@ -146,6 +146,50 @@ let test_fold_terms_in_a_mixed_structure () =
   Alcotest.(check (list term_testable))
     "fold_terms: mixed structure" expected actual
 
+(* variable_names *)
+
+let test_variable_names_empty () =
+  let formula = Pred ("P", []) in
+  let actual = variable_names ~init:[] formula in
+  let expected = [] in
+  Alcotest.(check (list string)) "variable_names: empty" expected actual
+
+let test_variable_names_quantifier_bound_var () =
+  let formula = Quant (Forall, "x", Pred ("Q", [ Var "x" ])) in
+  let actual = variable_names ~init:[] formula in
+  let expected = [ "x" ] in
+  Alcotest.(check (list string))
+    "variable_names: quantifier bound var" expected actual
+
+let test_variable_names_nested_with_init () =
+  let formula =
+    Conn
+      ( Conj,
+        [
+          Pred ("A", [ Function ("f", [ Var "x"; Var "y" ]) ]);
+          Quant (Exists, "y", Pred ("B", [ Var "y"; Var "z" ]));
+        ] )
+  in
+  let init = [ "a" ] in
+  let actual = variable_names ~init formula in
+  let expected = [ "z"; "y"; "x"; "a" ] in
+  Alcotest.(check (list string))
+    "variable_names: nested with init" expected actual
+
+let test_variable_names_duplicate_occurrences () =
+  let formula =
+    Conn
+      ( Disj,
+        [
+          Pred ("C", [ Var "x"; Var "y" ]);
+          Quant (Forall, "z", Pred ("D", [ Var "y"; Var "z" ]));
+        ] )
+  in
+  let actual = variable_names ~init:[] formula in
+  let expected = [ "z"; "y"; "x" ] in
+  Alcotest.(check (list string))
+    "variable_names: duplicate occurrences" expected actual
+
 (* pp *)
 
 let test_pp_conjunction_formula () =

@@ -62,9 +62,8 @@ let mk_list goal = List.map ~f:(mk goal)
 (*   | accum_goal f ((_,_,A)::G, bs) = accum_goal f (G, f(A,bs)); *)
 
 (* [accum_goal] in the original paper *)
-let rec fold_formulas ~f formulas_acc =
-  List.fold_left ~init:formulas_acc ~f:(fun acc (_, _, formula) ->
-      f acc formula)
+let rec fold_formulas ~f ~init =
+  List.fold_left ~f:(fun acc (_, _, formula) -> f acc formula) ~init
 
 let split goal =
   let open Formula in
@@ -109,4 +108,5 @@ let reduce goal _sideed_formula =
   (* let vars_in  *)
   failwith "blya"
 
-let variable_names = fold_formulas ~f:Formula.variable_names
+let variable_names ~init =
+  fold_formulas ~f:(fun acc f -> Formula.variable_names ~init:acc f) ~init

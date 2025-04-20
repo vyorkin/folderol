@@ -125,4 +125,4 @@ let subst_bound_var term formula =
   in
   subst 0 formula
 
-let variable_names = fold_terms ~f:Term.variable_names
+let variable_names ~init = fold_terms ~f:Term.variable_names init

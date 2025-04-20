@@ -61,91 +61,101 @@ let () =
         ] );
       ( "Formula: Fold terms",
         [
-          test_case "Fold terms empty" `Quick Formula_test.test_fold_terms_empty;
-          test_case "Fold terms in a single predicate" `Quick
+          test_case "empty terms" `Quick Formula_test.test_fold_terms_empty;
+          test_case "single predicate" `Quick
             Formula_test.test_fold_terms_in_a_single_predicate;
-          test_case "Fold terms in nested connectives" `Quick
+          test_case "nested connectives" `Quick
             Formula_test.test_fold_terms_in_nested_connectives;
-          test_case "Fold terms in a deep quantifier" `Quick
+          test_case "deep quantifier" `Quick
             Formula_test.test_fold_terms_in_a_deep_quantifier;
-          test_case "Fold terms a mixed structure" `Quick
+          test_case "mixed structure" `Quick
             Formula_test.test_fold_terms_in_a_mixed_structure;
+        ] );
+      ( "Formula: Variable names",
+        [
+          test_case "empty" `Quick Formula_test.test_variable_names_empty;
+          test_case "quantifier bound var" `Quick
+            Formula_test.test_variable_names_quantifier_bound_var;
+          test_case "nested with init" `Quick
+            Formula_test.test_variable_names_nested_with_init;
+          test_case "duplicate occurences" `Quick
+            Formula_test.test_variable_names_duplicate_occurrences;
         ] );
       ( "Formula: Pretty-print",
         [
-          test_case "Pretty-print conjunction formula" `Quick
+          test_case "pretty-print conjunction formula" `Quick
             Formula_test.test_pp_conjunction_formula;
-          test_case "Pretty-print quantified formula" `Quick
+          test_case "pretty-print quantified formula" `Quick
             Formula_test.test_pp_quantified_formula;
-          test_case "Pretty-print implication formula" `Quick
+          test_case "pretty-print implication formula" `Quick
             Formula_test.test_pp_implication;
         ] );
       ( "Parser",
         [
-          test_case "Parse atomic formula" `Quick
+          test_case "parse atomic formula" `Quick
             Parser_test.test_atomic_formula;
-          test_case "Parse conjunction formula" `Quick
+          test_case "parse conjunction formula" `Quick
             Parser_test.test_conjunction;
-          test_case "Parse implication formula" `Quick
+          test_case "parse implication formula" `Quick
             Parser_test.test_implication;
-          test_case "Parse formula with forall quantifier" `Quick
+          test_case "parse formula with forall quantifier" `Quick
             Parser_test.test_forall_quantifier;
-          test_case "Parse formula with exists quantifier" `Quick
+          test_case "parse formula with exists quantifier" `Quick
             Parser_test.test_exists_quantifier;
-          test_case "Parse formula with parentheses" `Quick
+          test_case "parse formula with parentheses" `Quick
             Parser_test.test_parentheses;
         ] );
       ( "Unification: Meta-variable resolution",
         [
-          test_case "With non-existent variable" `Quick
+          test_case "with non-existent variable" `Quick
             Unification_test.test_chase_var_with_non_existent_variable;
-          test_case "Basic variable resolution" `Quick
+          test_case "basic variable resolution" `Quick
             Unification_test.test_chase_var_basic_variable_resolution;
-          test_case "Chained variable resolution" `Quick
+          test_case "chained variable resolution" `Quick
             Unification_test.test_chase_var_chained_variable_resolution;
-          test_case "Resolves non-variable terms" `Quick
+          test_case "resolves non-variable terms" `Quick
             Unification_test.test_chase_var_resolves_non_variable_term;
         ] );
       ( "Unification: Occurs check",
         [
-          test_case "When variable does not occur" `Quick
+          test_case "when variable does not occur" `Quick
             Unification_test.test_occurs_in_when_variable_does_not_occur;
-          test_case "When variable occurs directly" `Quick
+          test_case "when variable occurs directly" `Quick
             Unification_test.test_occurs_in_when_varialbe_occurs_directly;
-          test_case "When variable occurs in parameter" `Quick
+          test_case "when variable occurs in parameter" `Quick
             Unification_test.test_occurs_in_when_variable_occurs_in_param;
-          test_case "When variable does not occur in parameter" `Quick
+          test_case "when variable does not occur in parameter" `Quick
             Unification_test
             .test_occurs_in_when_varialbe_does_not_occur_in_param;
-          test_case "When variable occurs in a nested function" `Quick
+          test_case "when variable occurs in a nested function" `Quick
             Unification_test
             .test_occurs_in_when_variable_occurs_in_nested_function;
-          test_case "When variable does not occur in a nested function" `Quick
+          test_case "when variable does not occur in a nested function" `Quick
             Unification_test
             .test_occurs_in_when_varialbe_does_not_occur_in_nested_function;
-          test_case "When variable does not occur in an empty function" `Quick
+          test_case "when variable does not occur in an empty function" `Quick
             Unification_test
             .test_occurs_in_when_varialbe_does_not_occur_in_empty_function;
         ] );
       ( "Unification",
         [
-          test_case "Unifies predicates" `Quick
+          test_case "unifies predicates" `Quick
             Unification_test.test_unify_unifies_predicates;
-          test_case "Fails with mismatched predicate names" `Quick
+          test_case "fails with mismatched predicate names" `Quick
             Unification_test.test_unify_fails_with_mismatched_predicate_names;
-          test_case "Occurs check failure" `Quick
+          test_case "occurs check failure" `Quick
             Unification_test.test_unify_occurs_check_failure;
-          test_case "Fails with mismatched term lists length" `Quick
+          test_case "fails with mismatched term lists length" `Quick
             Unification_test.test_unify_fails_with_mismatched_term_lists_length;
-          test_case "Unifies nested functions" `Quick
+          test_case "unifies nested functions" `Quick
             Unification_test.test_unify_unifies_nested_functions;
-          test_case "Unifies nested functions with variables" `Quick
+          test_case "unifies nested functions with variables" `Quick
             Unification_test.test_unify_unifies_nested_functions_with_variables;
-          test_case "Fails due to different nested functions" `Quick
+          test_case "fails due to different nested functions" `Quick
             Unification_test.test_unify_fails_due_to_different_nested_functions;
-          test_case "Unifies deeply nested structures" `Quick
+          test_case "unifies deeply nested structures" `Quick
             Unification_test.test_unify_unifies_deeply_nested_structures;
-          test_case "Unifies deep structures with multiple variables" `Quick
+          test_case "unifies deep structures with multiple variables" `Quick
             Unification_test
             .test_unify_unifies_deep_structures_with_multiple_variables;
         ] );
@@ -237,4 +247,5 @@ let () =
           test_case "mixed" `Quick Goal_table_test.test_insert_goals_mixed;
           test_case "nested" `Quick Goal_table_test.test_insert_goals_nested;
         ] );
+      (* TODO: variable_names *)
     ]

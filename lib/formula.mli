@@ -51,5 +51,5 @@ val abstract : Term.t -> t -> t
 val subst_bound_var : Term.t -> t -> t
 (** Replaces occurences of a bound variable by [Term.t]. *)
 
-val variable_names : string list -> t -> string list
+val variable_names : init:string list -> t -> string list
 (** Named [vars_in_form] in the original paper. *)
