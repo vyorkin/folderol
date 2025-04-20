@@ -7,9 +7,6 @@ type t =
   | Function of string * t list  (** Function application. *)
 [@@deriving eq, show]
 
-val variable_names : string list -> t -> string list
-(** Collects distinct variable names in a term. *)
-
 val pp_term : Format.formatter -> t -> unit
 (** Prints the term [t] using the format output function [fmt].
 
@@ -41,3 +38,7 @@ val replace : t * t -> t -> t
 
     If [old_term] is not found in [term], the original term is returned
     unmodified. *)
+
+val variable_names : string list -> t -> string list
+(** Collects distinct variable names in a term. Named [vars_in_term] in the
+    original paper. *)

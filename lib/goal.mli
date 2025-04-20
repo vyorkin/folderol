@@ -82,3 +82,4 @@ val reduce : t -> sided_formula -> t
     the immediate subformulas to build subgoals. *)
 
 val variable_names : init:string list -> t -> string list
+(** Named [vars_in_goal] in the original paper. *)

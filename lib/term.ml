@@ -8,13 +8,6 @@ type t =
   | Function of string * t list
 [@@deriving eq, show { with_path = false }]
 
-let rec variable_names vars term =
-  let ins x xs = if List.mem xs x ~equal:String.equal then xs else x :: xs in
-  match term with
-  | Var name -> ins name vars
-  | Function (_, args) -> List.fold ~init:vars ~f:variable_names args
-  | _ -> vars
-
 let rec pp_term fmt = function
   | Var x -> Format.fprintf fmt "%s" x
   | Param (name, vars) ->
@@ -42,3 +35,10 @@ let rec replace (old_term, new_term) term =
     | Function (name, args) ->
         Function (name, List.map args ~f:(replace (old_term, new_term)))
     | _ -> term
+
+let rec variable_names vars term =
+  let ins x xs = if List.mem xs x ~equal:String.equal then xs else x :: xs in
+  match term with
+  | Var name -> ins name vars
+  | Function (_, args) -> List.fold ~init:vars ~f:variable_names args
+  | _ -> vars
