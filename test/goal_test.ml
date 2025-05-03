@@ -115,23 +115,23 @@ let test_split_mixed_goal_entries () =
     [ Pred ("Q", [ Term.Var "y" ]); Pred ("S", [ Term.Var "w" ]) ]
     rs
 
-(* mk *)
+(* mk_subgoal *)
 
-let test_mk_empty_formulas () =
+let test_mk_subgoal_empty_formulas () =
   let open Formula in
   let goal = [ (1, L, Pred ("P", [ Term.Var "x" ])) ] in
-  let actual = Goal.mk goal [] in
+  let actual = Goal.mk_subgoal goal [] in
   Alcotest.(check goal_testable)
-    "mk: empty formulas leave goal unchanged" goal actual
+    "mk_subgoal: empty formulas leave goal unchanged" goal actual
 
-let test_mk_single_formula () =
+let test_mk_subgoal_single_formula () =
   (* mk [(P(x)|-)] [(Q∧|-)] -> [(Q∧|-), (P(x)|-)] *)
   let open Formula in
   let initial_predicate = Pred ("P", [ Term.Var "x" ]) in
   let initial_goal = [ (1, L, initial_predicate) ] in
   let new_conn_conj = Conn (Conj, [ Pred ("Q", []) ]) in
   let formulas = [ (L, new_conn_conj) ] in
-  let actual = Goal.mk initial_goal formulas in
+  let actual = Goal.mk_subgoal initial_goal formulas in
   let expected =
     [
       (1, L, new_conn_conj);
@@ -140,9 +140,9 @@ let test_mk_single_formula () =
       (* cost=1 for (L, Pred)  *)
     ]
   in
-  Alcotest.(check goal_testable) "mk: single formula" expected actual
+  Alcotest.(check goal_testable) "mk_subgoal: single formula" expected actual
 
-let test_mk_multiple_formulas () =
+let test_mk_subgoal_multiple_formulas () =
   let open Formula in
   let open Term in
   let p_x = Pred ("P", [ Var "x" ]) in
@@ -150,7 +150,7 @@ let test_mk_multiple_formulas () =
   let conn_impl = Conn (Impl, [ Pred ("A", []); Pred ("B", []) ]) in
   let quant_forall = Quant (Forall, "y", Pred ("Q", [ Var "y" ])) in
   let formulas = [ (R, conn_impl); (L, quant_forall) ] in
-  let actual = Goal.mk initial_goal formulas in
+  let actual = Goal.mk_subgoal initial_goal formulas in
   let expected =
     [
       (1, R, conn_impl);
@@ -161,15 +161,15 @@ let test_mk_multiple_formulas () =
       (* cost=3 for (L, Forall) *)
     ]
   in
-  Alcotest.(check goal_testable) "mk: multiple formulas" expected actual
+  Alcotest.(check goal_testable) "mk_subgoal: multiple formulas" expected actual
 
-(* mk_list *)
+(* mk_subgoals *)
 
-let test_mk_list_empty_input () =
-  let actual = Goal.mk_list [] [] in
-  Alcotest.(check (list goal_testable)) "mk_list: empty input" [] actual
+let test_mk_subgoals_empty_input () =
+  let actual = Goal.mk_subgoals [] [] in
+  Alcotest.(check (list goal_testable)) "mk_subgoals: empty input" [] actual
 
-let test_mk_list_multiple_goal_sets () =
+let test_mk_subgoals_multiple_goal_sets () =
   let open Formula in
   let p_b = Pred ("B", []) in
   let initial_goal = [ (1, L, p_b) ] in
@@ -179,7 +179,7 @@ let test_mk_list_multiple_goal_sets () =
   let formula_sets =
     [ [ (L, conn_disj) ]; [ (R, quant_exists); (L, conn_not) ] ]
   in
-  let actual_goals = Goal.mk_list initial_goal formula_sets in
+  let actual_goals = Goal.mk_subgoals initial_goal formula_sets in
   let expected_goals =
     [
       [
@@ -199,7 +199,7 @@ let test_mk_list_multiple_goal_sets () =
     ]
   in
   Alcotest.(check (list goal_testable))
-    "mk_list: mutiple goals" expected_goals actual_goals
+    "mk_subgoals: mutiple goals" expected_goals actual_goals
 
 (* solve *)
 

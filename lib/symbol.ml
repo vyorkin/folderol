@@ -1,5 +1,3 @@
-type t = string [@@deriving eq, show]
-
 let next_id =
   let n = ref (-1) in
   fun () ->
@@ -15,5 +13,3 @@ let rec mk_varname (n, tail) =
 let mk () =
   let id = next_id () in
   mk_varname (id, "")
-
-let of_string s = s

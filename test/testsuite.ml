@@ -8,7 +8,7 @@ let () =
           test_case "Generate multiple symbols" `Quick
             Symbol_test.test_mk_multiple_symbols;
         ] );
-      ( "Term: Variable names",
+      ( "Term: variable_names",
         [
           test_case "Initial list is empty" `Quick
             Term_test.test_variable_names_empty;
@@ -21,7 +21,7 @@ let () =
           test_case "Multiple variable names" `Quick
             Term_test.test_variable_names_dups;
         ] );
-      ( "Term: Replace",
+      ( "Term: replace",
         [
           test_case "Replace in a simple term" `Quick
             Term_test.test_replace_in_simple_term;
@@ -32,7 +32,7 @@ let () =
           test_case "Replace in a deeply nested function" `Quick
             Term_test.test_replace_in_deeply_nested_function;
         ] );
-      ( "Term: Pretty-print",
+      ( "Term: pp",
         [
           test_case "Pretty-print variable" `Quick Term_test.test_pp_variable;
           test_case "Pretty-print parameter" `Quick Term_test.test_pp_parameter;
@@ -45,21 +45,21 @@ let () =
           test_case "Pretty-print nested functions" `Quick
             Term_test.test_pp_nested_functions;
         ] );
-      ( "Formula: Abstract",
+      ( "Formula: abstract",
         [
           test_case "Abstract simple formula" `Quick
             Formula_test.test_abstract_simple_formula;
           test_case "Abstract nested formula" `Quick
             Formula_test.test_abstract_nested_formula;
         ] );
-      ( "Formula: Substitute",
+      ( "Formula: substitute",
         [
           test_case "Substitute bound var in simple formula" `Quick
             Formula_test.test_subst_bound_var_simple_formula;
           test_case "Substitute bound var in nested formula" `Quick
             Formula_test.test_subst_bound_var_nested_formula;
         ] );
-      ( "Formula: Fold terms",
+      ( "Formula: fold_terms",
         [
           test_case "empty terms" `Quick Formula_test.test_fold_terms_empty;
           test_case "single predicate" `Quick
@@ -71,7 +71,7 @@ let () =
           test_case "mixed structure" `Quick
             Formula_test.test_fold_terms_in_a_mixed_structure;
         ] );
-      ( "Formula: Variable names",
+      ( "Formula: variable_names",
         [
           test_case "empty" `Quick Formula_test.test_variable_names_empty;
           test_case "quantifier bound var" `Quick
@@ -81,7 +81,7 @@ let () =
           test_case "duplicate occurences" `Quick
             Formula_test.test_variable_names_duplicate_occurrences;
         ] );
-      ( "Formula: Pretty-print",
+      ( "Formula: pp",
         [
           test_case "pretty-print conjunction formula" `Quick
             Formula_test.test_pp_conjunction_formula;
@@ -105,7 +105,7 @@ let () =
           test_case "parse formula with parentheses" `Quick
             Parser_test.test_parentheses;
         ] );
-      ( "Unification: Meta-variable resolution",
+      ( "Unification: chase_var",
         [
           test_case "with non-existent variable" `Quick
             Unification_test.test_chase_var_with_non_existent_variable;
@@ -116,7 +116,7 @@ let () =
           test_case "resolves non-variable terms" `Quick
             Unification_test.test_chase_var_resolves_non_variable_term;
         ] );
-      ( "Unification: Occurs check",
+      ( "Unification: occurs_in",
         [
           test_case "when variable does not occur" `Quick
             Unification_test.test_occurs_in_when_variable_does_not_occur;
@@ -197,7 +197,7 @@ let () =
           test_case "nested substitution" `Quick
             Instantiation_test.test_instantiate_goals_nested_substitution;
         ] );
-      ( "Goal: Fold formulas",
+      ( "Goal: fold_formulas",
         [
           test_case "empty goal and single initial formula" `Quick
             Goal_test.test_fold_formulas_empty_goal;
@@ -209,26 +209,26 @@ let () =
             Goal_test
             .test_fold_formulas_goal_with_multiple_entries_and_initial_formulas;
         ] );
-      ( "Goal: Split",
+      ( "Goal: split",
         [
           test_case "empty goal" `Quick Goal_test.test_split_empty_goal;
           test_case "mixed goal entries" `Quick
             Goal_test.test_split_mixed_goal_entries;
         ] );
-      ( "Goal: Mk",
+      ( "Goal: mk_subgoal",
         [
-          test_case "empty formulas" `Quick Goal_test.test_mk_empty_formulas;
-          test_case "single formula" `Quick Goal_test.test_mk_single_formula;
+          test_case "empty formulas" `Quick Goal_test.test_mk_subgoal_empty_formulas;
+          test_case "single formula" `Quick Goal_test.test_mk_subgoal_single_formula;
           test_case "multiple formulas" `Quick
-            Goal_test.test_mk_multiple_formulas;
+            Goal_test.test_mk_subgoal_multiple_formulas;
         ] );
-      ( "Goal: Mk list",
+      ( "Goal: mk_subgoals",
         [
-          test_case "empty input" `Quick Goal_test.test_mk_list_empty_input;
+          test_case "empty input" `Quick Goal_test.test_mk_subgoals_empty_input;
           test_case "multiple goals" `Quick
-            Goal_test.test_mk_list_multiple_goal_sets;
+            Goal_test.test_mk_subgoals_multiple_goal_sets;
         ] );
-      ( "Goal: Solve",
+      ( "Goal: solve",
         [
           test_case "simple predicates" `Quick
             Goal_test.test_solve_basic_unification;
@@ -239,7 +239,7 @@ let () =
         ] );
       ( "Goal: reduce",
         [ test_case "whatever" `Quick Goal_test.test_reduce_whatever ] );
-      ( "Goal table: Insert goals",
+      ( "Goal_table: insert_goals",
         [
           test_case "solvable" `Quick Goal_table_test.test_insert_goals_solvable;
           test_case "unsolvable" `Quick

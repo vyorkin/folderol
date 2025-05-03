@@ -25,7 +25,7 @@ val insert_goal_entry_late : Goal_entry.t * t -> t
 (** Inserts a new [goal_entry] by placing it at the end of entries of equal
     cost. *)
 
-val mk : t -> sided_formula list -> t
+val mk_subgoal : t -> sided_formula list -> t
 (** A rule is applied to the head of this list. The tail holds the remaining
     formulas, which must be included in each subgoal. Each subgoal is made from
     the tail by adding new sequent components: pairs of type [side * formula].
@@ -34,7 +34,7 @@ val mk : t -> sided_formula list -> t
     into goal, which is the tail of the goal. It calls [add_estimation] to
     attach a cost to each formula/sequent component. *)
 
-val mk_list : t -> sided_formula list list -> t list
+val mk_subgoals : t -> sided_formula list list -> t list
 (** Since a rule may produce more than one subgoal, this [Goal.mk_list] function
     creates a list of subgoals from a goal and a list of new [side * formula]
     pairs. *)
@@ -80,6 +80,6 @@ val solve : t -> (Formula.t * unifier) list
 val variable_names : init:string list -> t -> string list
 (** Named [vars_in_goal] in the original paper. *)
 
-val reduce : t -> sided_formula -> t
-(** Handles all the rules. Given a formula and its side (left or right), it uses
-    the immediate subformulas to build subgoals. *)
+val reduce : t -> Goal_entry.t -> (t list, string) result
+(** Handles all the rules. Given a formula and its side, it uses the immediate
+    subformulas to build subgoals. *)
