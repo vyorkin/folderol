@@ -20,7 +20,7 @@ let cmd_file =
 
 let cmd_main =
   let doc = "Toy theorem prover" in
-  Cmd.(group (info "folderol" ~version:"%%VERSION%%" ~doc))
+  Cmd.(group (info "folderol" ~version:"0.1.0-dev" ~doc))
   @@ [ cmd_repl; cmd_file ]
 
 let main () = Cmd.eval' cmd_main
