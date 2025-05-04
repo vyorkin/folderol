@@ -24,6 +24,9 @@
   ppx_let
   (ppx_deriving
    (>= 6.0))
+  (cmdliner (>= 1.3))
+  (angstrom
+   (>= 0.16))
   (alcotest
    (>= 1.9))
   (menhir

@@ -1,7 +1,8 @@
 (executable
  (public_name folderol)
  (name main)
- (libraries folderol.lib))
+ (libraries cmdliner angstrom folderol.lib)
+ (preprocess (pps ppx_let)))
 
 (env
  (dev

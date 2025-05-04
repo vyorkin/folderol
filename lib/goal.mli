@@ -78,7 +78,8 @@ val solve : t -> (Formula.t * unifier) list
     unifier is identified. *)
 
 val variable_names : init:string list -> t -> string list
-(** Named [vars_in_goal] in the original paper. *)
+(** Collects distinct variable names in a formula. Named [vars_in_goal] in the
+    original paper. *)
 
 val reduce : t -> Goal_entry.t -> (t list, string) result
 (** Handles all the rules. Given a formula and its side, it uses the immediate
