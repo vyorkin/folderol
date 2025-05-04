@@ -18,7 +18,7 @@ type t =
 type side = L | R [@@deriving eq, show]
 
 type cost = int [@@deriving eq, show]
-(** Cost of the rule. *)
+(** Cost associated with applying the rule related to formula. *)
 
 val is_pred : t -> bool
 (** Returns [true] if formula is a predicate. *)

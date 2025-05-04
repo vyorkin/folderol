@@ -1,7 +1,7 @@
 open Core
 
-let print_error () =
-  Out_channel.eprintf "Error:\n%!";
+let print_error s =
+  Out_channel.eprintf "Error:\n%s\n" s;
   Out_channel.flush stderr
 
 let prompt = "folderol> "
@@ -24,15 +24,15 @@ let prompt_seq () = Sequence.unfold ~init:() ~f:prompt_repl
 let file_seq filename =
   let channel =
     try In_channel.create filename
-    with Sys_error _ ->
-      print_error ();
+    with Sys_error e ->
+      print_error e;
       exit 1
   in
   Sequence.unfold ~init:channel ~f:file_repl
 
 let process_line line =
   match Parser.parse_line line with
-  | Error _ -> print_error ()
+  | Error e -> print_error e
   | Ok action -> Action.run action
 
 let run = Sequence.iter ~f:process_line
