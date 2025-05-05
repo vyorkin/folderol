@@ -9,7 +9,7 @@ type t =
       (** Connectives like [A & B], [A | B], [A -> B], [A <-> B], [!B] and so
           on. Represented by the connective and the list of its subformulas. *)
   | Quant of quantifier * string * t
-      (** Quantified formulae like [\exists x.A] and [\forall x.A]. Represented
+      (** Quantified formulas like [\exists x.A] and [\forall x.A]. Represented
           by the type of quantifier, the name of bound variable (used only for
           printing) and the body. *)
 [@@deriving eq, show]
@@ -30,8 +30,8 @@ val estimate : side * t -> cost
 val add_estimation : side * t -> cost * side * t
 (** Estimates formula cost and attaches it. *)
 
-val fold_terms : f:('a -> Term.t -> 'a) -> 'a -> t -> 'a
-(** Recursively folds over all terms. Named [accum_form] in original paper. *)
+val fold_left : f:('accum -> Term.t -> 'accum) -> init:'accum -> t -> 'accum
+(** Folds over all terms. Named [accum_form] in original paper. *)
 
 val pp_formula : Format.formatter -> t -> unit
 (** Prints a formula using the given [fmt] formatter.
@@ -49,7 +49,9 @@ val abstract : Term.t -> t -> t
 (** Replaces occurences of [Term.t] by a bound variable. *)
 
 val subst_bound_var : Term.t -> t -> t
-(** Replaces occurences of a bound variable by [Term.t]. *)
+(** Replaces occurences of a bound variable by [Term.t]. This is "inverse"
+    operation of [abstract]. *)
 
 val variable_names : init:string list -> t -> string list
-(** Named [vars_in_form] in the original paper. *)
+(** Collects distinct variable names in a formula. Named [vars_in_form] in the
+    original paper. *)

@@ -10,31 +10,27 @@ let goal_entry_testable = Alcotest.(triple int side_testable formula_testable)
 let goal_testable = Alcotest.(list goal_entry_testable)
 let goal_table_testable = Alcotest.(list goal_testable)
 
-(* fold_formulas *)
+(* fold_left *)
 
-let test_fold_formulas_empty_goal () =
+let test_fold_left_empty_goal () =
   let open Formula in
   let formulas = [ Pred ("P", []) ] in
   let goal = [] in
-  let actual =
-    Goal.fold_formulas ~f:(fun acc f -> f :: acc) ~init:formulas goal
-  in
+  let actual = Goal.fold_left ~f:(fun acc f -> f :: acc) ~init:formulas goal in
   let expected = [ Pred ("P", []) ] in
   Alcotest.(check (list formula_testable))
-    "fold_formulas: empty goal and single initial formula" expected actual
+    "fold_left: empty goal and a single initial formula" expected actual
 
-let test_fold_formulas_goal_with_a_single_entry () =
+let test_fold_left_goal_with_a_single_entry () =
   let open Formula in
   let goal = [ (1, L, Pred ("Q", [ Var "x" ])) ] in
   let formulas = [] in
-  let actual =
-    Goal.fold_formulas ~f:(fun acc f -> f :: acc) ~init:formulas goal
-  in
+  let actual = Goal.fold_left ~f:(fun acc f -> f :: acc) ~init:formulas goal in
   let expected = [ Pred ("Q", [ Var "x" ]) ] in
   Alcotest.(check (list formula_testable))
-    "fold_formulas: goal with a single entry and empty formulas" expected actual
+    "fold_left: goal with a single entry and empty formulas" expected actual
 
-let test_fold_formulas_goal_with_multiple_entries () =
+let test_fold_left_goal_with_multiple_entries () =
   let open Formula in
   let goal =
     [
@@ -43,9 +39,7 @@ let test_fold_formulas_goal_with_multiple_entries () =
     ]
   in
   let formulas = [] in
-  let actual =
-    Goal.fold_formulas ~f:(fun acc f -> f :: acc) ~init:formulas goal
-  in
+  let actual = Goal.fold_left ~f:(fun acc f -> f :: acc) ~init:formulas goal in
   let expected =
     [
       Quant (Forall, "x", Pred ("P", [ Var "x" ]));
@@ -53,10 +47,9 @@ let test_fold_formulas_goal_with_multiple_entries () =
     ]
   in
   Alcotest.(check (list formula_testable))
-    "fold_formulas: goal with multiple entries and empty formulas" expected
-    actual
+    "fold_left: goal with multiple entries and empty formulas" expected actual
 
-let test_fold_formulas_goal_with_multiple_entries_and_initial_formulas () =
+let test_fold_left_goal_with_multiple_entries_and_initial_formulas () =
   let open Formula in
   let goal =
     [
@@ -65,9 +58,7 @@ let test_fold_formulas_goal_with_multiple_entries_and_initial_formulas () =
     ]
   in
   let formulas = [ Pred ("A", [ Var "z" ]) ] in
-  let actual =
-    Goal.fold_formulas ~f:(fun acc f -> f :: acc) ~init:formulas goal
-  in
+  let actual = Goal.fold_left ~f:(fun acc f -> f :: acc) ~init:formulas goal in
   let expected =
     [
       Pred ("B", [ Function ("f", [ Var "y" ]) ]);
@@ -76,7 +67,7 @@ let test_fold_formulas_goal_with_multiple_entries_and_initial_formulas () =
     ]
   in
   Alcotest.(check (list formula_testable))
-    "fold_formulas: initial formulas and a goal with multiple entries" expected
+    "fold_left: initial formulas and a goal with multiple entries" expected
     actual
 
 (* split *)
@@ -266,5 +257,3 @@ let test_solve_nested_terms () =
   in
   Alcotest.(check (list (pair formula_testable env_testable)))
     "solve: works with nested terms" expected result
-
-let test_reduce_whatever () = failwith "ebis konem"

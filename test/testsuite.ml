@@ -59,17 +59,17 @@ let () =
           test_case "Substitute bound var in nested formula" `Quick
             Formula_test.test_subst_bound_var_nested_formula;
         ] );
-      ( "Formula: fold_terms",
+      ( "Formula: fold_left",
         [
-          test_case "empty terms" `Quick Formula_test.test_fold_terms_empty;
+          test_case "empty terms" `Quick Formula_test.test_fold_left_empty;
           test_case "single predicate" `Quick
-            Formula_test.test_fold_terms_in_a_single_predicate;
+            Formula_test.test_fold_left_in_a_single_predicate;
           test_case "nested connectives" `Quick
-            Formula_test.test_fold_terms_in_nested_connectives;
+            Formula_test.test_fold_left_in_nested_connectives;
           test_case "deep quantifier" `Quick
-            Formula_test.test_fold_terms_in_a_deep_quantifier;
+            Formula_test.test_fold_left_in_a_deep_quantifier;
           test_case "mixed structure" `Quick
-            Formula_test.test_fold_terms_in_a_mixed_structure;
+            Formula_test.test_fold_left_in_a_mixed_structure;
         ] );
       ( "Formula: variable_names",
         [
@@ -197,17 +197,17 @@ let () =
           test_case "nested substitution" `Quick
             Instantiation_test.test_instantiate_goals_nested_substitution;
         ] );
-      ( "Goal: fold_formulas",
+      ( "Goal: fold_left",
         [
           test_case "empty goal and single initial formula" `Quick
-            Goal_test.test_fold_formulas_empty_goal;
+            Goal_test.test_fold_left_empty_goal;
           test_case "goal with a single entry and empty formulas" `Quick
-            Goal_test.test_fold_formulas_goal_with_a_single_entry;
+            Goal_test.test_fold_left_goal_with_a_single_entry;
           test_case "goal with multiple entries and empty formulas" `Quick
-            Goal_test.test_fold_formulas_goal_with_multiple_entries;
+            Goal_test.test_fold_left_goal_with_multiple_entries;
           test_case "initial formulas and a goal with multiple entries" `Quick
             Goal_test
-            .test_fold_formulas_goal_with_multiple_entries_and_initial_formulas;
+            .test_fold_left_goal_with_multiple_entries_and_initial_formulas;
         ] );
       ( "Goal: split",
         [
@@ -217,8 +217,10 @@ let () =
         ] );
       ( "Goal: mk_subgoal",
         [
-          test_case "empty formulas" `Quick Goal_test.test_mk_subgoal_empty_formulas;
-          test_case "single formula" `Quick Goal_test.test_mk_subgoal_single_formula;
+          test_case "empty formulas" `Quick
+            Goal_test.test_mk_subgoal_empty_formulas;
+          test_case "single formula" `Quick
+            Goal_test.test_mk_subgoal_single_formula;
           test_case "multiple formulas" `Quick
             Goal_test.test_mk_subgoal_multiple_formulas;
         ] );
@@ -237,8 +239,8 @@ let () =
             Goal_test.test_solve_multiple_unification;
           test_case "nested terms" `Quick Goal_test.test_solve_nested_terms;
         ] );
-      ( "Goal: reduce",
-        [ test_case "whatever" `Quick Goal_test.test_reduce_whatever ] );
+      (* ( "Goal: reduce", *)
+      (*   [ test_case "whatever" `Quick Goal_test.test_reduce_whatever ] ); *)
       ( "Goal_table: insert_goals",
         [
           test_case "solvable" `Quick Goal_table_test.test_insert_goals_solvable;

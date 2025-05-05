@@ -64,8 +64,8 @@ let mk_subgoals goal = List.map ~f:(mk_subgoal goal)
 (*   | accum_goal f ((_,_,A)::G, bs) = accum_goal f (G, f(A,bs)); *)
 
 (* [accum_goal] in the original paper *)
-let fold_formulas ~f ~init =
-  List.fold_left ~f:(fun acc (_, _, formula) -> f acc formula) ~init
+let fold_left ~f ~init entries =
+  entries |> List.map ~f:Goal_entry.formula |> List.fold_left ~f ~init
 
 let split goal =
   let open Formula in
@@ -105,14 +105,18 @@ let solve goal =
       If no reductions are possible, indicating that all formulas are atomic. *)
 
 let variable_names ~init =
-  fold_formulas ~f:(fun acc f -> Formula.variable_names ~init:acc f) ~init
+  fold_left ~f:(fun acc f -> Formula.variable_names ~init:acc f) ~init
 
 let reduce goal entry =
-  let to_subgoals = mk_subgoals goal in
+  (* We assume all formulas are [abstract]'ed. No formula contains free variables:
+     all variables are bound and all parameters are unbound. *)
+  let push_subgoals = mk_subgoals goal in
   let vars_in formula =
     let init = Formula.variable_names ~init:[] formula in
     variable_names ~init goal
   in
+  (* When applying the ∀R or ∃L rule we should replace the
+     bound variables (like x, y, z) with fresh parameters (like a, b, c) *)
   let subst_bound_var_with_param formula =
     Formula.subst_bound_var (Term.Param (Symbol.mk (), vars_in formula)) formula
   in
@@ -121,27 +125,42 @@ let reduce goal entry =
   in
   let reduce_goal ((_, side, formula) as entry) =
     let open Formula in
+    (* This function adds (push) subtheorems (subgoals) whose truth is required to prove the 
+       main theorem using sequent calculus rules from Gentzen's LK. *)
+    (* Note that in comments below:
+       [ f0, f1, ..., fn |- ] ~ [ f0 |-, f1 |- , ..., fn |- ]
+       and
+       [ f0 |-, |- f1 ] ~ [ f0 |- f1 ] *)
     match (side, formula) with
-    | R, Conn (Not, [ f ]) -> Ok (to_subgoals [ [ (L, f) ] ])
-    | L, Conn (Not, [ f ]) -> Ok (to_subgoals [ [ (R, f) ] ])
+    (* (¬R): |- ¬f ==> [ f |- ], [ |- ¬f ] *)
+    | R, Conn (Not, [ f ]) -> Ok (push_subgoals [ [ (L, f) ] ])
+    (* (¬L): ¬f |- ==> [ |- f ], [ ¬f |- ] *)
+    | L, Conn (Not, [ f ]) -> Ok (push_subgoals [ [ (R, f) ] ])
+    (* (∧R): |- f0 ∧ f1 ==> [ |- f0 ], [ |- f1 ], [ |- f0 ∧ f1 ] *)
     | R, Conn (Conj, [ f0; f1 ]) ->
-        Ok (to_subgoals [ [ (R, f0) ]; [ (R, f1) ] ])
-    | L, Conn (Conj, [ f0; f1 ]) ->
-        Ok (to_subgoals [ [ (L, f0) ]; [ (L, f1) ] ])
-    | R, Conn (Disj, [ f0; f1 ]) ->
-        Ok (to_subgoals [ [ (R, f0) ]; [ (R, f1) ] ])
+        Ok (push_subgoals [ [ (R, f0) ]; [ (R, f1) ] ])
+    (* (∧L): f0 ∧ f1 |- ==> [ f0, f1 |- ], [ f0 ∧ f1 ] *)
+    | L, Conn (Conj, [ f0; f1 ]) -> Ok (push_subgoals [ [ (L, f0); (L, f1) ] ])
+    (* (∨R): |- f0 ∨ f1 ==> [ |- f0, f1 ], [ |- f0 ∨ f1 ] *)
+    | R, Conn (Disj, [ f0; f1 ]) -> Ok (push_subgoals [ [ (R, f0); (R, f1) ] ])
+    (* (∨L): f0 ∨ f1 |- ==> [ f0 |- ], [ f1 |- ], [ f0 ∨ f1 ] *)
     | L, Conn (Disj, [ f0; f1 ]) ->
-        Ok (to_subgoals [ [ (L, f0) ]; [ (L, f1) ] ])
-    | R, Conn (Impl, [ f0; f1 ]) ->
-        Ok (to_subgoals [ [ (L, f0) ]; [ (R, f1) ] ])
+        Ok (push_subgoals [ [ (L, f0) ]; [ (L, f1) ] ])
+    (* (→R): |- f0 → f1 ==> [ f0 |- f1 ], [ |- f0 → f1 ] *)
+    | R, Conn (Impl, [ f0; f1 ]) -> Ok (push_subgoals [ [ (L, f0); (R, f1) ] ])
+    (* (→L): f0 → f1 |- ==> [ |- f0 ], [ f1 |- ], [ f0 → f1 |- ] *)
     | L, Conn (Impl, [ f0; f1 ]) ->
-        Ok (to_subgoals [ [ (R, f0) ]; [ (L, f1) ] ])
+        Ok (push_subgoals [ [ (R, f0) ]; [ (L, f1) ] ])
+    (* (↔R): |- f0 ↔ f1 ==> [ f0 |- f1 ], [ f1 |- f0 ], [ |- f0 ↔ f1 ] *)
     | R, Conn (Iff, [ f0; f1 ]) ->
-        Ok (to_subgoals [ [ (L, f0); (R, f1) ]; [ (R, f0); (L, f1) ] ])
+        Ok (push_subgoals [ [ (L, f0); (R, f1) ]; [ (R, f0); (L, f1) ] ])
+    (* (↔L): f0 ↔ f1 |- ==> [ f0, f1 |- ], [ |- f0, f1 ], [ f0 ↔ f1 |- ] *)
     | L, Conn (Iff, [ f0; f1 ]) ->
-        Ok (to_subgoals [ [ (L, f0); (L, f1) ]; [ (R, f0); (R, f1) ] ])
+        Ok (push_subgoals [ [ (L, f0); (L, f1) ]; [ (R, f0); (R, f1) ] ])
+    (* (∀R) *)
     | R, Quant (Forall, _, f) ->
-        Ok (to_subgoals [ [ (R, subst_bound_var_with_param f) ] ])
+        Ok (push_subgoals [ [ (R, subst_bound_var_with_param f) ] ])
+    (* (∀L) *)
     | L, Quant (Forall, _, f) ->
         Ok
           [
@@ -149,6 +168,7 @@ let reduce goal entry =
               ( add_estimation (L, subst_bound_var_with_var f),
                 insert_goal_entry_late (entry, goal) );
           ]
+    (* (∃R) *)
     | R, Quant (Exists, _, f) ->
         Ok
           [
@@ -156,8 +176,9 @@ let reduce goal entry =
               ( add_estimation (R, subst_bound_var_with_var f),
                 insert_goal_entry_late (entry, goal) );
           ]
+    (* (∃L) *)
     | L, Quant (Exists, _, f) ->
-        Ok (to_subgoals [ [ (L, subst_bound_var_with_param f) ] ])
+        Ok (push_subgoals [ [ (L, subst_bound_var_with_param f) ] ])
     | _ ->
         Error
           (Printf.sprintf "Reduce failed: %s %s" (Formula.show_side side)

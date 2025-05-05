@@ -30,18 +30,17 @@ val mk_subgoal : t -> sided_formula list -> t
     formulas, which must be included in each subgoal. Each subgoal is made from
     the tail by adding new sequent components: pairs of type [side * formula].
 
-    Calling [Goal.mk goal sided_formulas] copies the pairs (sequent components)
-    into goal, which is the tail of the goal. It calls [add_estimation] to
-    attach a cost to each formula/sequent component. *)
+    Calling [Goal.mk_subgoal goal sided_formulas] copies the pairs (sequent
+    components) into goal, which is the tail of the goal. It calls
+    [add_estimation] to attach a cost to each formula/sequent component. *)
 
 val mk_subgoals : t -> sided_formula list list -> t list
-(** Since a rule may produce more than one subgoal, this [Goal.mk_list] function
-    creates a list of subgoals from a goal and a list of new [side * formula]
-    pairs. *)
+(** Since a rule may produce more than one subgoal, this [Goal.mk_subgoals]
+    function creates a list of subgoals from a goal and a list of new
+    [side * formula] pairs. *)
 
-val fold_formulas : f:('a -> Formula.t -> 'a) -> init:'a -> t -> 'a
-(** Recursively folds over all formulas. Named [accum_goal] in the original
-    paper. *)
+val fold_left : f:('accum -> Formula.t -> 'accum) -> init:'accum -> t -> 'accum
+(** Folds over all formulas. Named [accum_goal] in the original paper. *)
 
 val split : t -> Formula.t list * Formula.t list
 (** Splits a goal represented as a list of triples [cost * side * Formula.t]

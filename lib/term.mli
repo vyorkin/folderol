@@ -2,8 +2,10 @@ type t =
   | Var of string  (** Meta-variable. *)
   | Param of string * string list
       (** Parameters like [b[?a1, ..., ?an]]. Each parameter has a name and a
-          list of variables that represent provisos of quantifier rules. *)
-  | Bound of int  (** Bound variable. *)
+          list of variables that represent provisos of quantifier rules
+          (dependencies). Proviso is a statement in an agreement, saying that a
+          particular thing must happen before another can. *)
+  | Bound of int  (** Bound variable. Used in quantified formulas. *)
   | Function of string * t list  (** Function application. *)
 [@@deriving eq, show]
 

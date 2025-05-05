@@ -64,12 +64,12 @@ let add_estimation (side, connective) =
 (*   | accum_form f (Quant(_,_,A), bs) = accum_form f (A,bs); *)
 
 (* [accum_form] in the original paper *)
-let rec fold_terms ~f terms_acc = function
+let rec fold_left ~f ~init:terms_acc = function
   | Pred (_, args) -> List.fold_left args ~init:terms_acc ~f
   | Conn (_, subformulas) ->
       List.fold_left subformulas ~init:terms_acc ~f:(fun acc subformula ->
-          fold_terms ~f acc subformula)
-  | Quant (_, _, body) -> fold_terms ~f terms_acc body
+          fold_left ~f ~init:acc subformula)
+  | Quant (_, _, body) -> fold_left ~f ~init:terms_acc body
 
 let rec pp_formula fmt = function
   | Pred (name, terms) ->
@@ -125,4 +125,4 @@ let subst_bound_var term formula =
   in
   subst 0 formula
 
-let variable_names ~init = fold_terms ~f:Term.variable_names init
+let variable_names ~init = fold_left ~f:Term.variable_names ~init
