@@ -46,11 +46,11 @@ val to_string : t -> string
     @return A string representing the formula. *)
 
 val abstract : Term.t -> t -> t
-(** Replaces occurences of [Term.t] by a bound variable. *)
+(** Replaces all occurrences of [Term.t] with a bound variable. *)
 
 val subst_bound_var : Term.t -> t -> t
-(** Replaces occurences of a bound variable by [Term.t]. This is "inverse"
-    operation of [abstract]. *)
+(** Replaces all occurrences of a bound variable with [Term.t]. This is
+    "inverse" operation of [abstract]. *)
 
 val variable_names : init:string list -> t -> string list
 (** Collects distinct variable names in a formula. Named [vars_in_form] in the
