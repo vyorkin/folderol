@@ -1,8 +1,10 @@
+open Pretty_printing
 module List = Core.List
 
 type sided_formula = Formula.side * Formula.t
 type t = Goal_entry.t list
 
+let mk entries = entries
 let unify env (f1, f2) = Unification.unify env (f1, f2) |> Result.to_option
 
 (* insert 1 into [1, 3, 0, 1]:
@@ -185,3 +187,6 @@ let reduce goal entry =
              (Formula.to_string formula))
   in
   reduce_goal entry
+
+let pp _fmt = failwith "todo"
+let to_string = format_to_string pp

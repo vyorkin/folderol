@@ -32,29 +32,29 @@ let is_pred = function Pred _ -> true | _ -> false
 
 let estimate (side, connective) =
   match (side, connective) with
-  (* 1 subgoal *)
+  (* 1 subgoal. *)
   | _, Conn (Not, _) -> 1
   | L, Conn (Conj, _) -> 1
   | R, Conn (Disj, _) -> 1
   | R, Conn (Impl, _) -> 1
   | R, Quant (Forall, _, _) -> 1
   | L, Quant (Exists, _, _) -> 1
-  (* 2 subgoals *)
+  (* 2 subgoals. *)
   | R, Conn (Conj, _) -> 2
   | L, Conn (Disj, _) -> 2
   | L, Conn (Impl, _) -> 2
   | _, Conn (Iff, _) -> 2
-  (* quantifier expansion *)
+  (* Quantifier expansion. *)
   | L, Quant (Forall, _, _) -> 3 (* ∀L *)
   | R, Quant (Exists, _, _) -> 3 (* ∃R *)
-  (* no reductions *)
+  (* No reductions. *)
   | _, _ -> 4
 
 let add_estimation (side, connective) =
   let cost = estimate (side, connective) in
   (cost, side, connective)
 
-(* SML version from the folderol paper *)
+(* SML version from the folderol paper: *)
 
 (* fun accumulate f ([], y)    = y *)
 (*   | accumulate f (x::xs, y) = accumulate f (xs, f(x,y)) *)
@@ -63,7 +63,7 @@ let add_estimation (side, connective) =
 (*   | accum_form f (Conn(_,As), bs)   = accumulate (accum_form f) (As, bs) *)
 (*   | accum_form f (Quant(_,_,A), bs) = accum_form f (A,bs); *)
 
-(* [accum_form] in the original paper *)
+(* Named [accum_form] in the original paper. *)
 let rec fold_left ~f ~init:terms_acc = function
   | Pred (_, args) -> List.fold_left args ~init:terms_acc ~f
   | Conn (_, subformulas) ->
@@ -96,7 +96,7 @@ let rec pp_formula fmt = function
       else Format.fprintf fmt "(%a)" (fun fmt body -> pp_formula fmt body) body;
       Format.close_box ()
 
-(* formats a negation of a formula *)
+(* Formats a negation of a formula. *)
 and pp_not fmt subformula =
   pp_connective fmt Not;
   Format.open_box 0;

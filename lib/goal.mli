@@ -5,8 +5,15 @@ type sided_formula = Formula.side * Formula.t
     antecedent (left) or succedent (right) of a sequent Γ ⊢ Δ. *)
 
 type t = Goal_entry.t list
-(** A goal is a list of [Goal_entry.t], each is basically a triple
-    [cost * side * formula]. *)
+(** A goal is a list of [Goal_entry.t], where each entry is essentially a
+    triple: [cost * side * formula].
+
+    The list is kept sorted by [cost]. To maintain this order, we use the
+    functions: [insert_goal_entry], [insert_goal_entry_early], and
+    [insert_goal_entry_late]. *)
+
+val mk : Goal_entry.t list -> t
+(** Creates a new goal. *)
 
 val insert_goal_entry :
   less:(Goal_entry.t * Goal_entry.t -> bool) -> Goal_entry.t * t -> t
@@ -83,3 +90,9 @@ val variable_names : init:string list -> t -> string list
 val reduce : t -> Goal_entry.t -> (t list, string) result
 (** Handles all the rules. Given a formula and its side, it uses the immediate
     subformulas to build subgoals. *)
+
+val pp : Format.formatter -> t -> unit
+(** Prints a goal using the given [fmt] formatter. *)
+
+val to_string : t -> string
+(** Prints a goal. *)
