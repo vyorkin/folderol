@@ -247,6 +247,23 @@ let () =
             Goal_test.test_solve_multiple_unification;
           test_case "nested terms" `Quick Goal_test.test_solve_nested_terms;
         ] );
+      ( "Goal: reduce",
+        [
+          test_case "¬R rule" `Quick Goal_test.test_reduce_not_right;
+          test_case "¬L rule" `Quick Goal_test.test_reduce_not_left;
+          test_case "∧R rule" `Quick Goal_test.test_reduce_conj_right;
+          test_case "∧L rule" `Quick Goal_test.test_reduce_conj_left;
+          test_case "∨R rule" `Quick Goal_test.test_reduce_disj_right;
+          test_case "∨L rule" `Quick Goal_test.test_reduce_disj_left;
+          test_case "→R rule" `Quick Goal_test.test_reduce_impl_right;
+          test_case "→L rule" `Quick Goal_test.test_reduce_impl_left;
+          test_case "↔R rule" `Quick Goal_test.test_reduce_iff_right;
+          test_case "↔L rule" `Quick Goal_test.test_reduce_iff_left;
+          test_case "∀R rule" `Quick Goal_test.test_reduce_forall_right;
+          test_case "∀L rule" `Quick Goal_test.test_reduce_forall_left;
+          test_case "∃R rule" `Quick Goal_test.test_reduce_exists_right;
+          test_case "∃L rule" `Quick Goal_test.test_reduce_exists_left;
+        ] );
       ( "Goal: pp",
         [
           test_case "empty goal" `Quick Goal_test.test_to_string_empty_goal;

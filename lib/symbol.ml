@@ -1,9 +1,10 @@
-let next_id =
-  let n = ref (-1) in
-  fun () ->
-    incr n;
-    !n
+let id = ref (-1)
 
+let next_id () =
+  incr id;
+  !id
+
+let reset () = id := -1
 let mk_char_string n = Char.code 'a' + n |> Char.chr |> String.make 1
 
 let rec mk_varname (n, tail) =

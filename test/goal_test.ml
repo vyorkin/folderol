@@ -258,6 +258,222 @@ let test_solve_nested_terms () =
   Alcotest.(check (list (pair formula_testable env_testable)))
     "solve: works with nested terms" expected result
 
+(* variable_names *)
+
+let test_variable_names_empty_goal () =
+  let goal = [] in
+  let actual = Goal.variable_names ~init:[] goal in
+  let expected = [] in
+  Alcotest.(check (list string))
+    "variable_names: empty goal returns empty list" expected actual
+
+let test_variable_names_simple_goal () =
+  let open Formula in
+  let open Term in
+  let goal =
+    [ (1, L, Pred ("P", [ Var "x" ])); (2, R, Pred ("Q", [ Var "y" ])) ]
+  in
+  let actual = Goal.variable_names ~init:[] goal in
+  let expected = [ "y"; "x" ] in
+  Alcotest.(check (list string))
+    "variable_names: simple goal with two variables" expected actual
+
+let test_variable_names_with_init_and_duplicates () =
+  let open Formula in
+  let open Term in
+  let goal =
+    [
+      (1, L, Pred ("P", [ Var "x"; Function ("f", [ Var "z" ]) ]));
+      (1, R, Quant (Forall, "y", Pred ("Q", [ Var "y"; Var "x" ])));
+    ]
+  in
+  let init = [ "a"; "z" ] in
+  let actual = Goal.variable_names ~init goal in
+  let expected = [ "y"; "x"; "a"; "z" ] in
+  Alcotest.(check (list string))
+    "variable_names: with init list and duplicate variables" expected actual
+
+(* reduce *)
+
+(* (¬R): |- ¬P ==> [ P |- ] *)
+let test_reduce_not_right () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, R, Conn (Not, [ Pred ("P", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected = Ok [ [ (4, L, Pred ("P", [])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ¬R rule" expected result
+
+(* (¬L): ¬P |- ==> [ |- P ] *)
+let test_reduce_not_left () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, L, Conn (Not, [ Pred ("P", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected = Ok [ [ (4, R, Pred ("P", [])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ¬L rule" expected result
+
+(* (∧R): |- P ∧ Q ==> [ |- P ], [ |- Q ] *)
+let test_reduce_conj_right () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, R, Conn (Conj, [ Pred ("P", []); Pred ("Q", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected =
+    Ok [ [ (4, R, Pred ("P", [])) ]; [ (4, R, Pred ("Q", [])) ] ]
+  in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ∧R rule" expected result
+
+(* (∧L): P ∧ Q |- ==> [ P, Q |- ] *)
+let test_reduce_conj_left () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, L, Conn (Conj, [ Pred ("P", []); Pred ("Q", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected = Ok [ [ (4, L, Pred ("P", [])); (4, L, Pred ("Q", [])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ∧L rule" expected result
+
+let test_reduce_disj_right () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, R, Conn (Disj, [ Pred ("P", []); Pred ("Q", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected = Ok [ [ (4, R, Pred ("P", [])); (4, R, Pred ("Q", [])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ∨R rule" expected result
+
+let test_reduce_disj_left () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, L, Conn (Disj, [ Pred ("P", []); Pred ("Q", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected =
+    Ok [ [ (4, L, Pred ("P", [])) ]; [ (4, L, Pred ("Q", [])) ] ]
+  in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ∨L rule" expected result
+
+let test_reduce_impl_right () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, R, Conn (Impl, [ Pred ("P", []); Pred ("Q", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected = Ok [ [ (4, L, Pred ("P", [])); (4, R, Pred ("Q", [])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: →R rule" expected result
+
+let test_reduce_impl_left () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, L, Conn (Impl, [ Pred ("P", []); Pred ("Q", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected =
+    Ok [ [ (4, R, Pred ("P", [])) ]; [ (4, L, Pred ("Q", [])) ] ]
+  in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: →L rule" expected result
+
+let test_reduce_iff_right () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, R, Conn (Iff, [ Pred ("P", []); Pred ("Q", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected =
+    Ok
+      [
+        [ (4, L, Pred ("P", [])); (4, R, Pred ("Q", [])) ];
+        [ (4, R, Pred ("P", [])); (4, L, Pred ("Q", [])) ];
+      ]
+  in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ↔R rule" expected result
+
+let test_reduce_iff_left () =
+  let open Formula in
+  let goal = [] in
+  let entry = (1, L, Conn (Iff, [ Pred ("P", []); Pred ("Q", []) ])) in
+  let result = Goal.reduce goal entry in
+  let expected =
+    Ok
+      [
+        [ (4, L, Pred ("P", [])); (4, L, Pred ("Q", [])) ];
+        [ (4, R, Pred ("P", [])); (4, R, Pred ("Q", [])) ];
+      ]
+  in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ↔L rule" expected result
+
+(* (∀R) *)
+let test_reduce_forall_right () =
+  let open Formula in
+  let open Term in
+  Symbol.reset ();
+  let goal = [] in
+  let entry = (1, R, Quant (Forall, "x", Pred ("P", [ Bound 0 ]))) in
+  let result = Goal.reduce goal entry in
+  let expected = Ok [ [ (4, R, Pred ("P", [ Param ("a", []) ])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ∀R rule" expected result
+
+(* (∀L):
+   ∀x.P(x) |- ==> [ ∀x.P(x), ∀x.P[t/x] |- ]
+   or
+   ∀x.P(0) |- ==> [ ∀x.P(x), ∀x.P(t) |- ],
+   where t := Var "a" *)
+let test_reduce_forall_left () =
+  let open Formula in
+  let open Term in
+  Symbol.reset ();
+  let goal = [] in
+  let entry = (1, L, Quant (Forall, "x", Pred ("P", [ Bound 0 ]))) in
+  let result = Goal.reduce goal entry in
+  (* A copy of ∀x.P is retained in the subgoal so that
+     the rule can be applied again with different terms. *)
+  let expected = Ok [ [ entry; (4, L, Pred ("P", [ Var "a" ])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ∀L rule" expected result
+
+(* (∃R):
+   |- ∃x.P(x) ==> [ ∃x.P(x), |- ∃x.P(t/x) ]
+   or
+   |- ∃x.P(0) ==> [ ∃x.P(x), |- ∃x.P(t) ],
+   where t := Var "a" *)
+let test_reduce_exists_right () =
+  let open Formula in
+  let open Term in
+  Symbol.reset ();
+  let goal = [] in
+  let entry = (1, R, Quant (Exists, "x", Pred ("P", [ Bound 0 ]))) in
+  let result = Goal.reduce goal entry in
+  (* The rule ∃R similarly retains the quantified formula in its subgoal. *)
+  let expected = Ok [ [ entry; (4, R, Pred ("P", [ Var "a" ])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ∃R rule" expected result
+
+(* (∃L) *)
+let test_reduce_exists_left () =
+  let open Formula in
+  let open Term in
+  Symbol.reset ();
+  let goal = [] in
+  let entry = (1, L, Quant (Exists, "x", Pred ("P", [ Bound 0 ]))) in
+  let result = Goal.reduce goal entry in
+  let expected = Ok [ [ (4, L, Pred ("P", [ Param ("a", []) ])) ] ] in
+  Alcotest.(check (result (list goal_testable) string))
+    "reduce: ∃L rule" expected result
+
+(* TODO: *)
+(*   let goal = [ (1, R, Pred ("P", [])) ] in *)
+(*   let entry = (1, L, Pred ("P", [])) in *)
+
+(* TODO: *)
+(*   let goal = [ (1, R, Pred ("Q", [])) ] in *)
+(*   let entry = (1, L, Pred ("P", [])) in *)
+
 (* to_string *)
 
 let test_to_string_empty_goal () =
@@ -293,38 +509,3 @@ let test_to_string_complex_goal () =
   let actual = Goal.to_string goal in
   let expected = "A ∧ B, ∀x.P(x) |- C → D" in
   Alcotest.(check string) "to_string: complex goal" expected actual
-
-(* variable_names *)
-
-let test_variable_names_empty_goal () =
-  let goal = [] in
-  let actual = Goal.variable_names ~init:[] goal in
-  let expected = [] in
-  Alcotest.(check (list string))
-    "variable_names: empty goal returns empty list" expected actual
-
-let test_variable_names_simple_goal () =
-  let open Formula in
-  let open Term in
-  let goal =
-    [ (1, L, Pred ("P", [ Var "x" ])); (2, R, Pred ("Q", [ Var "y" ])) ]
-  in
-  let actual = Goal.variable_names ~init:[] goal in
-  let expected = [ "y"; "x" ] in
-  Alcotest.(check (list string))
-    "variable_names: simple goal with two variables" expected actual
-
-let test_variable_names_with_init_and_duplicates () =
-  let open Formula in
-  let open Term in
-  let goal =
-    [
-      (1, L, Pred ("P", [ Var "x"; Function ("f", [ Var "z" ]) ]));
-      (1, R, Quant (Forall, "y", Pred ("Q", [ Var "y"; Var "x" ])));
-    ]
-  in
-  let init = [ "a"; "z" ] in
-  let actual = Goal.variable_names ~init goal in
-  let expected = [ "y"; "x"; "a"; "z" ] in
-  Alcotest.(check (list string))
-    "variable_names: with init list and duplicate variables" expected actual

@@ -53,7 +53,7 @@ let insert_goal_entry_late = insert_goal_entry ~less:goal_entry_less_or_eq
 let mk_subgoal goal sided_formulas =
   sided_formulas
   |> List.map ~f:Formula.add_estimation
-  |> List.fold_left ~init:goal ~f:(fun acc formula ->
+  |> List.fold_right ~init:goal ~f:(fun formula acc ->
          insert_goal_entry_early (formula, acc))
 
 (** Creates a list of subgoals from a goal (list of tuples
@@ -110,7 +110,8 @@ let variable_names ~init =
   fold_left ~f:(fun acc f -> Formula.variable_names ~init:acc f) ~init
 
 let reduce goal entry =
-  (* We assume all formulas are [abstract]'ed. No formula contains free variables:
+  (* We assume all formulas in [goal] or [entry] are [abstract]'ed.
+     No formula contains free variables: 
      all variables are bound and all parameters are unbound. *)
   let push_subgoals = mk_subgoals goal in
   let vars_in formula =
@@ -134,29 +135,29 @@ let reduce goal entry =
        and
        [ f0 |-, |- f1 ] ~ [ f0 |- f1 ] *)
     match (side, formula) with
-    (* (¬R): |- ¬f ==> [ f |- ], [ |- ¬f ] *)
+    (* (¬R): |- ¬f ==> [ f |- ] *)
     | R, Conn (Not, [ f ]) -> Ok (push_subgoals [ [ (L, f) ] ])
-    (* (¬L): ¬f |- ==> [ |- f ], [ ¬f |- ] *)
+    (* (¬L): ¬f |- ==> [ |- f ] *)
     | L, Conn (Not, [ f ]) -> Ok (push_subgoals [ [ (R, f) ] ])
-    (* (∧R): |- f0 ∧ f1 ==> [ |- f0 ], [ |- f1 ], [ |- f0 ∧ f1 ] *)
+    (* (∧R): |- f0 ∧ f1 ==> [ |- f0 ], [ |- f1 ] *)
     | R, Conn (Conj, [ f0; f1 ]) ->
         Ok (push_subgoals [ [ (R, f0) ]; [ (R, f1) ] ])
-    (* (∧L): f0 ∧ f1 |- ==> [ f0, f1 |- ], [ f0 ∧ f1 ] *)
+    (* (∧L): f0 ∧ f1 |- ==> [ f0, f1 |- ] *)
     | L, Conn (Conj, [ f0; f1 ]) -> Ok (push_subgoals [ [ (L, f0); (L, f1) ] ])
-    (* (∨R): |- f0 ∨ f1 ==> [ |- f0, f1 ], [ |- f0 ∨ f1 ] *)
+    (* (∨R): |- f0 ∨ f1 ==> [ |- f0, f1 ] *)
     | R, Conn (Disj, [ f0; f1 ]) -> Ok (push_subgoals [ [ (R, f0); (R, f1) ] ])
-    (* (∨L): f0 ∨ f1 |- ==> [ f0 |- ], [ f1 |- ], [ f0 ∨ f1 ] *)
+    (* (∨L): f0 ∨ f1 |- ==> [ f0 |- ], [ f1 |- ] *)
     | L, Conn (Disj, [ f0; f1 ]) ->
         Ok (push_subgoals [ [ (L, f0) ]; [ (L, f1) ] ])
-    (* (→R): |- f0 → f1 ==> [ f0 |- f1 ], [ |- f0 → f1 ] *)
+    (* (→R): |- f0 → f1 ==> [ f0 |- f1 ] *)
     | R, Conn (Impl, [ f0; f1 ]) -> Ok (push_subgoals [ [ (L, f0); (R, f1) ] ])
-    (* (→L): f0 → f1 |- ==> [ |- f0 ], [ f1 |- ], [ f0 → f1 |- ] *)
+    (* (→L): f0 → f1 |- ==> [ |- f0 ], [ f1 |- ] *)
     | L, Conn (Impl, [ f0; f1 ]) ->
         Ok (push_subgoals [ [ (R, f0) ]; [ (L, f1) ] ])
-    (* (↔R): |- f0 ↔ f1 ==> [ f0 |- f1 ], [ f1 |- f0 ], [ |- f0 ↔ f1 ] *)
+    (* (↔R): |- f0 ↔ f1 ==> [ f0 |- f1 ], [ f1 |- f0 ] *)
     | R, Conn (Iff, [ f0; f1 ]) ->
         Ok (push_subgoals [ [ (L, f0); (R, f1) ]; [ (R, f0); (L, f1) ] ])
-    (* (↔L): f0 ↔ f1 |- ==> [ f0, f1 |- ], [ |- f0, f1 ], [ f0 ↔ f1 |- ] *)
+    (* (↔L): f0 ↔ f1 |- ==> [ f0, f1 |- ], [ |- f0, f1 ] *)
     | L, Conn (Iff, [ f0; f1 ]) ->
         Ok (push_subgoals [ [ (L, f0); (L, f1) ]; [ (R, f0); (R, f1) ] ])
     (* (∀R) *)
@@ -166,6 +167,8 @@ let reduce goal entry =
     | L, Quant (Forall, _, f) ->
         Ok
           [
+            (* A copy of ∀x.A is retained in the subgoal so that 
+               the rule can be applied again with different terms. *)
             insert_goal_entry_early
               ( add_estimation (L, subst_bound_var_with_var f),
                 insert_goal_entry_late (entry, goal) );
@@ -174,6 +177,7 @@ let reduce goal entry =
     | R, Quant (Exists, _, f) ->
         Ok
           [
+            (* The rule ∃R similarly retains the quantified formula in its subgoal. *)
             insert_goal_entry_early
               ( add_estimation (R, subst_bound_var_with_var f),
                 insert_goal_entry_late (entry, goal) );
