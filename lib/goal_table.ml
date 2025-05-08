@@ -28,5 +28,14 @@ let rec insert_goals table = function
           (* Not solvable, add as is. *)
           insert_goals (g :: table) (gs, fs))
 
-let pp _fmt = failwith "todo"
+let pp fmt goal_table =
+  let open Format in
+  fprintf fmt "@[<v>";
+  if List.is_empty goal_table then fprintf fmt "∅"
+  else
+    List.iteri goal_table ~f:(fun i goal ->
+        if i > 0 then fprintf fmt "@,";
+        fprintf fmt "%d: %a" i Goal.pp goal);
+  fprintf fmt "@]"
+
 let to_string = format_to_string pp

@@ -72,6 +72,7 @@ let rec fold_left ~f ~init:terms_acc = function
   | Quant (_, _, body) -> fold_left ~f ~init:terms_acc body
 
 let rec pp_formula fmt = function
+  | Pred (name, []) -> Format.fprintf fmt "%s" name
   | Pred (name, terms) ->
       Format.fprintf fmt "%s(%a)" name
         (Format.pp_print_list ~pp_sep:pp_comma Term.pp_term)

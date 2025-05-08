@@ -257,3 +257,74 @@ let test_solve_nested_terms () =
   in
   Alcotest.(check (list (pair formula_testable env_testable)))
     "solve: works with nested terms" expected result
+
+(* to_string *)
+
+let test_to_string_empty_goal () =
+  let goal = [] in
+  let actual = Goal.to_string goal in
+  let expected = " |- " in
+  Alcotest.(check string) "to_string: empty goal" expected actual
+
+let test_to_string_mixed_goal () =
+  let open Formula in
+  let open Term in
+  let goal =
+    [
+      (4, L, Pred ("P", [ Var "x" ]));
+      (4, R, Pred ("Q", [ Var "y" ]));
+      (4, L, Pred ("R", [ Var "z" ]));
+    ]
+  in
+  let actual = Goal.to_string goal in
+  let expected = "P(x), R(z) |- Q(y)" in
+  Alcotest.(check string) "to_string: mixed goal" expected actual
+
+let test_to_string_complex_goal () =
+  let open Formula in
+  let open Term in
+  let goal =
+    [
+      (1, L, Conn (Conj, [ Pred ("A", []); Pred ("B", []) ]));
+      (1, R, Conn (Impl, [ Pred ("C", []); Pred ("D", []) ]));
+      (3, L, Quant (Forall, "x", Pred ("P", [ Var "x" ])));
+    ]
+  in
+  let actual = Goal.to_string goal in
+  let expected = "A ∧ B, ∀x.P(x) |- C → D" in
+  Alcotest.(check string) "to_string: complex goal" expected actual
+
+(* variable_names *)
+
+let test_variable_names_empty_goal () =
+  let goal = [] in
+  let actual = Goal.variable_names ~init:[] goal in
+  let expected = [] in
+  Alcotest.(check (list string))
+    "variable_names: empty goal returns empty list" expected actual
+
+let test_variable_names_simple_goal () =
+  let open Formula in
+  let open Term in
+  let goal =
+    [ (1, L, Pred ("P", [ Var "x" ])); (2, R, Pred ("Q", [ Var "y" ])) ]
+  in
+  let actual = Goal.variable_names ~init:[] goal in
+  let expected = [ "y"; "x" ] in
+  Alcotest.(check (list string))
+    "variable_names: simple goal with two variables" expected actual
+
+let test_variable_names_with_init_and_duplicates () =
+  let open Formula in
+  let open Term in
+  let goal =
+    [
+      (1, L, Pred ("P", [ Var "x"; Function ("f", [ Var "z" ]) ]));
+      (1, R, Quant (Forall, "y", Pred ("Q", [ Var "y"; Var "x" ])));
+    ]
+  in
+  let init = [ "a"; "z" ] in
+  let actual = Goal.variable_names ~init goal in
+  let expected = [ "y"; "x"; "a"; "z" ] in
+  Alcotest.(check (list string))
+    "variable_names: with init list and duplicate variables" expected actual

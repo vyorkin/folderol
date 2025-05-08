@@ -91,6 +91,8 @@ val reduce : t -> Goal_entry.t -> (t list, string) result
 (** Handles all the rules. Given a formula and its side, it uses the immediate
     subformulas to build subgoals. *)
 
+val pp_goal_entries : Format.formatter -> t -> unit
+
 val pp : Format.formatter -> t -> unit
 (** Prints a goal using the given [fmt] formatter. *)
 

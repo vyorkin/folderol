@@ -121,21 +121,21 @@ let () =
           test_case "when variable does not occur" `Quick
             Unification_test.test_occurs_in_when_variable_does_not_occur;
           test_case "when variable occurs directly" `Quick
-            Unification_test.test_occurs_in_when_varialbe_occurs_directly;
+            Unification_test.test_occurs_in_when_variable_occurs_directly;
           test_case "when variable occurs in parameter" `Quick
             Unification_test.test_occurs_in_when_variable_occurs_in_param;
           test_case "when variable does not occur in parameter" `Quick
             Unification_test
-            .test_occurs_in_when_varialbe_does_not_occur_in_param;
+            .test_occurs_in_when_variable_does_not_occur_in_param;
           test_case "when variable occurs in a nested function" `Quick
             Unification_test
             .test_occurs_in_when_variable_occurs_in_nested_function;
           test_case "when variable does not occur in a nested function" `Quick
             Unification_test
-            .test_occurs_in_when_varialbe_does_not_occur_in_nested_function;
+            .test_occurs_in_when_variable_does_not_occur_in_nested_function;
           test_case "when variable does not occur in an empty function" `Quick
             Unification_test
-            .test_occurs_in_when_varialbe_does_not_occur_in_empty_function;
+            .test_occurs_in_when_variable_does_not_occur_in_empty_function;
         ] );
       ( "Unification",
         [
@@ -209,6 +209,14 @@ let () =
             Goal_test
             .test_fold_left_goal_with_multiple_entries_and_initial_formulas;
         ] );
+      ( "Goal: variable_names",
+        [
+          test_case "empty goal" `Quick Goal_test.test_variable_names_empty_goal;
+          test_case "simple goal with variables" `Quick
+            Goal_test.test_variable_names_simple_goal;
+          test_case "with init and duplicates" `Quick
+            Goal_test.test_variable_names_with_init_and_duplicates;
+        ] );
       ( "Goal: split",
         [
           test_case "empty goal" `Quick Goal_test.test_split_empty_goal;
@@ -239,8 +247,20 @@ let () =
             Goal_test.test_solve_multiple_unification;
           test_case "nested terms" `Quick Goal_test.test_solve_nested_terms;
         ] );
-      (* ( "Goal: reduce", *)
-      (*   [ test_case "whatever" `Quick Goal_test.test_reduce_whatever ] ); *)
+      ( "Goal: pp",
+        [
+          test_case "empty goal" `Quick Goal_test.test_to_string_empty_goal;
+          test_case "mixed goal" `Quick Goal_test.test_to_string_mixed_goal;
+          test_case "complex goal" `Quick Goal_test.test_to_string_complex_goal;
+        ] );
+      ( "Goal_entry: pp",
+        [
+          test_case "left side" `Quick Goal_entry_test.test_to_string_left_side;
+          test_case "right side" `Quick
+            Goal_entry_test.test_to_string_right_side;
+          test_case "complex formula" `Quick
+            Goal_entry_test.test_to_string_complex_formula;
+        ] );
       ( "Goal_table: insert_goals",
         [
           test_case "solvable" `Quick Goal_table_test.test_insert_goals_solvable;
@@ -249,5 +269,13 @@ let () =
           test_case "mixed" `Quick Goal_table_test.test_insert_goals_mixed;
           test_case "nested" `Quick Goal_table_test.test_insert_goals_nested;
         ] );
-      (* TODO: variable_names *)
+      ( "Goal_table: pp",
+        [
+          test_case "empty table" `Quick
+            Goal_table_test.test_to_string_empty_table;
+          test_case "single goal" `Quick
+            Goal_table_test.test_to_string_single_goal;
+          test_case "multiple goals" `Quick
+            Goal_table_test.test_to_string_multiple_goals;
+        ] );
     ]

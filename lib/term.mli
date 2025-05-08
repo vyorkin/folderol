@@ -16,9 +16,9 @@ val pp_term : Format.formatter -> t -> unit
 
     {[
       pp_term fmt (Var "x");
-      pp_term fmt (Param ("f", [ "x"; "y" ]));
+      pp_term fmt (Param ("b", [ "x"; "y" ]));
       pp_term fmt (Bound 3);
-      pp_term fmt (Function ("add", [ Var "x"; Var "y" ]))
+      pp_term fmt (Function ("P", [ Var "x"; Var "y" ]))
     ]}
 
     @param fmt The formatter to which the formatted term is output.

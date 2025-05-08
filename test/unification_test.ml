@@ -48,7 +48,7 @@ let test_occurs_in_when_variable_does_not_occur () =
   Alcotest.(check bool)
     "chase_var: when variable does not occur" false (occurs_in env "x" term)
 
-let test_occurs_in_when_varialbe_occurs_directly () =
+let test_occurs_in_when_variable_occurs_directly () =
   let env = Env.empty in
   let term = Term.Function ("f", [ Term.Var "x"; Term.Var "y" ]) in
   Alcotest.(check bool)
@@ -60,7 +60,7 @@ let test_occurs_in_when_variable_occurs_in_param () =
   Alcotest.(check bool)
     "chase_var: variable occurs in parameter" true (occurs_in env "x" term)
 
-let test_occurs_in_when_varialbe_does_not_occur_in_param () =
+let test_occurs_in_when_variable_does_not_occur_in_param () =
   let env = Env.empty in
   let term = Term.Param ("p", [ "y"; "z" ]) in
   Alcotest.(check bool)
@@ -76,14 +76,14 @@ let test_occurs_in_when_variable_occurs_in_nested_function () =
     "chase_var: variable occurs in nested function" true
     (occurs_in env "x" term)
 
-let test_occurs_in_when_varialbe_does_not_occur_in_nested_function () =
+let test_occurs_in_when_variable_does_not_occur_in_nested_function () =
   let open Term in
   let term = Function ("f", [ Function ("g", [ Var "z" ]); Var "y" ]) in
   Alcotest.(check bool)
     "occurs_in: variable does not occur in nested function" false
     (occurs_in Env.empty "x" term)
 
-let test_occurs_in_when_varialbe_does_not_occur_in_empty_function () =
+let test_occurs_in_when_variable_does_not_occur_in_empty_function () =
   let term = Term.Function ("f", []) in
   Alcotest.(check bool)
     "occurs_in: variable does not occur in empty Function" false

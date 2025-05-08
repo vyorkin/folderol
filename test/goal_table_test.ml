@@ -121,3 +121,40 @@ let test_insert_goals_nested () =
     "insert_goals nested: final_fs" expected_fs final_fs;
   Alcotest.(check goal_table_testable)
     "insert_goals nested: final_goal_table" expected_goal_table final_goal_table
+
+(* to_string *)
+
+let test_to_string_empty_table () =
+  let table = [] in
+  let actual = Goal_table.to_string table in
+  let expected = "∅" in
+  Alcotest.(check string) "to_string: empty table" expected actual
+
+let test_to_string_single_goal () =
+  let open Formula in
+  let open Term in
+  let table =
+    [ [ (4, L, Pred ("P", [ Var "x" ])); (4, R, Pred ("Q", [ Var "y" ])) ] ]
+  in
+  let actual = Goal_table.to_string table in
+  let expected = "0: P(x) |- Q(y)" in
+  Alcotest.(check string) "to_string: single goal" expected actual
+
+let test_to_string_multiple_goals () =
+  let open Formula in
+  let open Term in
+  let table =
+    [
+      [
+        (1, L, Conn (Conj, [ Pred ("A", []); Pred ("B", []) ]));
+        (2, R, Conn (Conj, [ Pred ("C", []); Pred ("D", []) ]));
+      ];
+      [
+        (3, L, Quant (Forall, "x", Pred ("P", [ Var "x" ])));
+        (3, R, Quant (Exists, "y", Pred ("Q", [ Var "y" ])));
+      ];
+    ]
+  in
+  let actual = Goal_table.to_string table in
+  let expected = "0: A ∧ B |- C ∧ D\n1: ∀x.P(x) |- ∃y.Q(y)" in
+  Alcotest.(check string) "to_string: multiple goals" expected actual

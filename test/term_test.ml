@@ -74,8 +74,8 @@ let test_pp_variable () =
   Alcotest.(check string) "pp: variable" expected actual
 
 let test_pp_parameter () =
-  let expected = "f(x, y, z)" in
-  let actual = to_string (Param ("f", [ "x"; "y"; "z" ])) in
+  let expected = "b(?x, ?y, ?z)" in
+  let actual = to_string (Param ("b", [ "x"; "y"; "z" ])) in
   Alcotest.(check string) "pp: parameter" expected actual
 
 let test_pp_bound_variable () =
@@ -84,30 +84,30 @@ let test_pp_bound_variable () =
   Alcotest.(check string) "pp: bound variable" expected actual
 
 let test_pp_function_with_no_arguments () =
-  let expected = "g()" in
-  let actual = to_string (Function ("g", [])) in
+  let expected = "P()" in
+  let actual = to_string (Function ("P", [])) in
   Alcotest.(check string) "pp: function with no arguments" expected actual
 
 let test_pp_function_with_arguments () =
-  let expected = "h(x, f(a, b))" in
+  let expected = "Q(x, P(a, b))" in
   let actual =
     to_string
-      (Function ("h", [ Var "x"; Function ("f", [ Var "a"; Var "b" ]) ]))
+      (Function ("Q", [ Var "x"; Function ("P", [ Var "a"; Var "b" ]) ]))
   in
   Alcotest.(check string) "pp: function with arguments" expected actual
 
 let test_pp_nested_functions () =
-  let expected = "k(h(f(a), g(b, c)), x)" in
+  let expected = "W(Z(P(a), Q(b, c)), x)" in
   let actual =
     to_string
       (Function
-         ( "k",
+         ( "W",
            [
              Function
-               ( "h",
+               ( "Z",
                  [
-                   Function ("f", [ Var "a" ]);
-                   Function ("g", [ Var "b"; Var "c" ]);
+                   Function ("P", [ Var "a" ]);
+                   Function ("Q", [ Var "b"; Var "c" ]);
                  ] );
              Var "x";
            ] ))

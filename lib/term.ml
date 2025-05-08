@@ -14,10 +14,13 @@ let rec pp_term fmt = function
       Format.fprintf fmt "%s(%a)" name
         (fun fmt vars ->
           Format.open_hvbox 0;
-          Format.pp_print_list ~pp_sep:pp_comma Format.pp_print_string fmt vars;
+          Format.pp_print_list ~pp_sep:pp_comma
+            (fun fmt var -> Format.fprintf fmt "?%s" var)
+            fmt vars;
           Format.close_box ())
         vars
   | Bound ix -> Format.fprintf fmt "%d" ix
+  (* | Function (name, []) -> Format.fprintf fmt "%s" name *)
   | Function (name, args) ->
       Format.fprintf fmt "%s(%a)" name
         (fun fmt args ->

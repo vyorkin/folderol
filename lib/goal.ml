@@ -127,9 +127,9 @@ let reduce goal entry =
   in
   let reduce_goal ((_, side, formula) as entry) =
     let open Formula in
-    (* This function adds (push) subtheorems (subgoals) whose truth is required to prove the 
-       main theorem using sequent calculus rules from Gentzen's LK. *)
-    (* Note that in comments below:
+    (* This function adds (push) subtheorems (subgoals) whose truth is required to 
+       prove the main theorem using sequent calculus rules from Gentzen's LK.
+       Note that in comments below:
        [ f0, f1, ..., fn |- ] ~ [ f0 |-, f1 |- , ..., fn |- ]
        and
        [ f0 |-, |- f1 ] ~ [ f0 |- f1 ] *)
@@ -188,5 +188,26 @@ let reduce goal entry =
   in
   reduce_goal entry
 
-let pp _fmt = failwith "todo"
+let pp_goal_entries fmt goal =
+  let open Format in
+  fprintf fmt "@[<v>";
+  List.iter goal ~f:(fprintf fmt "%a@," Goal_entry.pp);
+  fprintf fmt "@]"
+
+let pp fmt goal =
+  let open Format in
+  let gamma, delta = split goal in
+
+  fprintf fmt "@[<h>";
+
+  let pp_goal_formulas fmt formulas =
+    if not (List.is_empty formulas) then
+      pp_print_list ~pp_sep:pp_comma Formula.pp_formula fmt formulas
+  in
+
+  pp_goal_formulas fmt gamma;
+  fprintf fmt " |- ";
+  pp_goal_formulas fmt delta;
+  fprintf fmt "@]"
+
 let to_string = format_to_string pp
