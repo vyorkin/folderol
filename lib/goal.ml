@@ -136,55 +136,66 @@ let reduce goal entry =
        [ f0 |-, |- f1 ] ~ [ f0 |- f1 ] *)
     match (side, formula) with
     (* (¬R): |- ¬f ==> [ f |- ] *)
-    | R, Conn (Not, [ f ]) -> Ok (push_subgoals [ [ (L, f) ] ])
+    | R, Conn (Not, [ f ]) -> Ok (Rule.NotR, push_subgoals [ [ (L, f) ] ])
     (* (¬L): ¬f |- ==> [ |- f ] *)
-    | L, Conn (Not, [ f ]) -> Ok (push_subgoals [ [ (R, f) ] ])
+    | L, Conn (Not, [ f ]) -> Ok (Rule.NotL, push_subgoals [ [ (R, f) ] ])
     (* (∧R): |- f0 ∧ f1 ==> [ |- f0 ], [ |- f1 ] *)
     | R, Conn (Conj, [ f0; f1 ]) ->
-        Ok (push_subgoals [ [ (R, f0) ]; [ (R, f1) ] ])
+        Ok (Rule.ConjR, push_subgoals [ [ (R, f0) ]; [ (R, f1) ] ])
     (* (∧L): f0 ∧ f1 |- ==> [ f0, f1 |- ] *)
-    | L, Conn (Conj, [ f0; f1 ]) -> Ok (push_subgoals [ [ (L, f0); (L, f1) ] ])
+    | L, Conn (Conj, [ f0; f1 ]) ->
+        Ok (Rule.ConjL, push_subgoals [ [ (L, f0); (L, f1) ] ])
     (* (∨R): |- f0 ∨ f1 ==> [ |- f0, f1 ] *)
-    | R, Conn (Disj, [ f0; f1 ]) -> Ok (push_subgoals [ [ (R, f0); (R, f1) ] ])
+    | R, Conn (Disj, [ f0; f1 ]) ->
+        Ok (Rule.DisjR, push_subgoals [ [ (R, f0); (R, f1) ] ])
     (* (∨L): f0 ∨ f1 |- ==> [ f0 |- ], [ f1 |- ] *)
     | L, Conn (Disj, [ f0; f1 ]) ->
-        Ok (push_subgoals [ [ (L, f0) ]; [ (L, f1) ] ])
+        Ok (Rule.DisjL, push_subgoals [ [ (L, f0) ]; [ (L, f1) ] ])
     (* (→R): |- f0 → f1 ==> [ f0 |- f1 ] *)
-    | R, Conn (Impl, [ f0; f1 ]) -> Ok (push_subgoals [ [ (L, f0); (R, f1) ] ])
+    | R, Conn (Impl, [ f0; f1 ]) ->
+        Ok (Rule.ImplR, push_subgoals [ [ (L, f0); (R, f1) ] ])
     (* (→L): f0 → f1 |- ==> [ |- f0 ], [ f1 |- ] *)
     | L, Conn (Impl, [ f0; f1 ]) ->
-        Ok (push_subgoals [ [ (R, f0) ]; [ (L, f1) ] ])
+        Ok (Rule.ImplL, push_subgoals [ [ (R, f0) ]; [ (L, f1) ] ])
     (* (↔R): |- f0 ↔ f1 ==> [ f0 |- f1 ], [ f1 |- f0 ] *)
     | R, Conn (Iff, [ f0; f1 ]) ->
-        Ok (push_subgoals [ [ (L, f0); (R, f1) ]; [ (R, f0); (L, f1) ] ])
+        Ok
+          ( Rule.IffR,
+            push_subgoals [ [ (L, f0); (R, f1) ]; [ (R, f0); (L, f1) ] ] )
     (* (↔L): f0 ↔ f1 |- ==> [ f0, f1 |- ], [ |- f0, f1 ] *)
     | L, Conn (Iff, [ f0; f1 ]) ->
-        Ok (push_subgoals [ [ (L, f0); (L, f1) ]; [ (R, f0); (R, f1) ] ])
+        Ok
+          ( Rule.IffL,
+            push_subgoals [ [ (L, f0); (L, f1) ]; [ (R, f0); (R, f1) ] ] )
     (* (∀R) *)
     | R, Quant (Forall, _, f) ->
-        Ok (push_subgoals [ [ (R, subst_bound_var_with_param f) ] ])
+        Ok
+          (Rule.ForallR, push_subgoals [ [ (R, subst_bound_var_with_param f) ] ])
     (* (∀L) *)
     | L, Quant (Forall, _, f) ->
         Ok
-          [
-            (* A copy of ∀x.A is retained in the subgoal so that 
+          ( Rule.ForallL,
+            [
+              (* A copy of ∀x.A is retained in the subgoal so that 
                the rule can be applied again with different terms. *)
-            insert_goal_entry_early
-              ( add_estimation (L, subst_bound_var_with_var f),
-                insert_goal_entry_late (entry, goal) );
-          ]
+              insert_goal_entry_early
+                ( add_estimation (L, subst_bound_var_with_var f),
+                  insert_goal_entry_late (entry, goal) );
+            ] )
     (* (∃R) *)
     | R, Quant (Exists, _, f) ->
         Ok
-          [
-            (* The rule ∃R similarly retains the quantified formula in its subgoal. *)
-            insert_goal_entry_early
-              ( add_estimation (R, subst_bound_var_with_var f),
-                insert_goal_entry_late (entry, goal) );
-          ]
+          ( Rule.ExistsR,
+            [
+              (* The rule ∃R similarly retains the quantified formula in its subgoal. *)
+              insert_goal_entry_early
+                ( add_estimation (R, subst_bound_var_with_var f),
+                  insert_goal_entry_late (entry, goal) );
+            ] )
     (* (∃L) *)
     | L, Quant (Exists, _, f) ->
-        Ok (push_subgoals [ [ (L, subst_bound_var_with_param f) ] ])
+        Ok
+          (Rule.ExistsL, push_subgoals [ [ (L, subst_bound_var_with_param f) ] ])
     | _ ->
         Error
           (Printf.sprintf "Reduce failed: %s %s" (Formula.show_side side)
@@ -201,16 +212,15 @@ let pp_goal_entries fmt goal =
 let pp fmt goal =
   let open Format in
   let gamma, delta = split goal in
-
   fprintf fmt "@[<h>";
-
   let pp_goal_formulas fmt formulas =
     if not (List.is_empty formulas) then
       pp_print_list ~pp_sep:pp_comma Formula.pp_formula fmt formulas
   in
-
   pp_goal_formulas fmt gamma;
-  fprintf fmt " |- ";
+  if not (List.is_empty gamma) then fprintf fmt " ";
+  fprintf fmt "|-";
+  if not (List.is_empty delta) then fprintf fmt " ";
   pp_goal_formulas fmt delta;
   fprintf fmt "@]"
 

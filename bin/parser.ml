@@ -11,9 +11,11 @@ let newline = take_while is_newline
 let load = choice [ string "load"; string "l" ] <* newline
 let read = string "read" <* newline
 let readn = string "readn" <* newline
-let step = string "step" <* newline
+let step = choice [ string "step"; string "s" ] <* newline
 let stepn = string "stepn" <* newline
 let run = choice [ string "run"; string "r" ] <* newline
+let print = choice [ string "print"; string "p" ] <* newline
+let clear = string "clear" <* newline
 let help = choice [ string "help"; string "h" ] <* newline
 let quit = choice [ string "quit"; string "q"; string "exit" ] <* newline
 
@@ -33,6 +35,8 @@ let parser =
       step *> return Action.Step;
       (stepn *> token >>| fun n -> Action.StepN (Core.Int.of_string n));
       run *> return Action.Run;
+      print *> return Action.Print;
+      clear *> return Action.Clear;
       help *> return Action.Help;
       quit *> return Action.Quit;
     ]

@@ -4,7 +4,7 @@ let print_error s =
   Out_channel.eprintf "Error:\n%s\n" s;
   Out_channel.flush stderr
 
-let prompt = "folderol> "
+let prompt = "Γ|-∆> "
 
 let prompt_repl () =
   Out_channel.printf "%s%!" prompt;

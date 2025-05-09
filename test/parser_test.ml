@@ -15,6 +15,29 @@ let test_atomic_formula () =
   let parsed = parse_formula input in
   Alcotest.(check formula_testable) "Parse atomic formula" expected parsed
 
+let test_predicate_without_parameters () =
+  let open Formula in
+  let input = "P" in
+  let expected = Pred ("P", []) in
+  let parsed = parse_formula input in
+  Alcotest.(check formula_testable)
+    "Parse predicate without parameters" expected parsed
+
+let test_complex_formula_with_empty_predicates () =
+  let open Formula in
+  let input = "P ∧ (Q → R(x))" in
+  let expected =
+    Conn
+      ( Conj,
+        [
+          Pred ("P", []);
+          Conn (Impl, [ Pred ("Q", []); Pred ("R", [ Var "x" ]) ]);
+        ] )
+  in
+  let parsed = parse_formula input in
+  Alcotest.(check formula_testable)
+    "Parse complex formula with empty predicates" expected parsed
+
 let test_conjunction () =
   let open Formula in
   let input = "P(x) ∧ Q(y)" in

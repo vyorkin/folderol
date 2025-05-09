@@ -87,9 +87,11 @@ val variable_names : init:string list -> t -> string list
 (** Collects distinct variable names in a formula. Named [vars_in_goal] in the
     original paper. *)
 
-val reduce : t -> Goal_entry.t -> (t list, string) result
+val reduce : t -> Goal_entry.t -> (Rule.t * t list, string) result
 (** Handles all the rules. Given a formula and its side, it uses the immediate
-    subformulas to build subgoals. *)
+    subformulas to build subgoals.
+
+    @return A list of subgoals and the rule that was applied. *)
 
 val pp_goal_entries : Format.formatter -> t -> unit
 

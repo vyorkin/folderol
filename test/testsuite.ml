@@ -94,6 +94,10 @@ let () =
         [
           test_case "parse atomic formula" `Quick
             Parser_test.test_atomic_formula;
+          test_case "parse predicate without parameters" `Quick
+            Parser_test.test_predicate_without_parameters;
+          test_case "parse complex formula with empty predicates" `Quick
+            Parser_test.test_complex_formula_with_empty_predicates;
           test_case "parse conjunction formula" `Quick
             Parser_test.test_conjunction;
           test_case "parse implication formula" `Quick

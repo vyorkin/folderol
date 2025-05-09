@@ -11,6 +11,8 @@ type t =
   | Step
   | StepN of int
   | Run
+  | Clear
+  | Print
   | Help
   | Quit
 [@@deriving show { with_path = false }]
@@ -38,13 +40,28 @@ let read line =
   match parse_formula line with
   | Ok formula ->
       let formula_str = Formula.to_string formula in
+      Proof.init (Goal_table.mk ([], [ formula ]));
       print_endline formula_str
   | Error err -> print_endline err
 
 let readn lines = failwith "not supported yet"
-let step () = failwith "todo"
-let stepn n = failwith "todo"
-let run () = failwith "todo"
+
+let step () =
+  match Proof.step () with
+  | Ok table -> print_endline (Goal_table.to_string table)
+  | Error err -> print_endline err
+
+let stepn n =
+  match Proof.steps n with
+  | Ok table -> print_endline (Goal_table.to_string table)
+  | Error err -> print_endline err
+
+let run () = stepn Int.max_value
+let print () = Proof.print_goal_table ()
+
+let clear () =
+  Proof.clear ();
+  print_endline "Goal table cleared"
 
 let help () =
   print_endline "Available commands:";
@@ -54,6 +71,8 @@ let help () =
   print_endline "step, s - Reduce goal";
   print_endline "stepn - Perform N steps at once";
   print_endline "run, r - Run all steps";
+  print_endline "print, p - Print goal table";
+  print_endline "clear - Clear all goals";
   print_endline "help, h - Show this help text";
   print_endline "quit, q, exit - Exit REPL"
 
@@ -67,5 +86,7 @@ let run = function
   | Step -> step ()
   | StepN n -> stepn n
   | Run -> run ()
+  | Print -> print ()
+  | Clear -> clear ()
   | Help -> help ()
   | Quit -> quit ()

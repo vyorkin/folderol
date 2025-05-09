@@ -51,6 +51,7 @@ l_formula:
   | l_formula IFF  l_formula  { Conn(Iff, [$1; $3]) }
   | NOT l_formula             { Conn(Not, [$2]) }
   | STRING "(" terms ")"      { Pred($1, $3) }
+  | STRING                    { Pred($1, []) }
   | LPAREN formula RPAREN     { $2 }
   ;
 
