@@ -4,16 +4,16 @@ My little theorem prover. Based on the Designing a Theorem Prover paper by Lawre
 
 ## Blog posts
 
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-1/>
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-2/>
-<https://vyorkin.org/posts/forwards-reasoning-vs-backwards-reasoning/>
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-3/>
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-4/>
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-5/>
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-6/>
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-7/>
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-8/>
-<https://vyorkin.org/posts/designing-a-theorem-prover-part-9/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-1/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-2/>
+- <https://vyorkin.org/posts/forwards-reasoning-vs-backwards-reasoning/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-3/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-4/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-5/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-6/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-7/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-8/>
+- <https://vyorkin.org/posts/designing-a-theorem-prover-part-9/>
 
 ## Setup
 
