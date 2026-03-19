@@ -34,8 +34,7 @@ let save_state () =
   Proof.with_goal_table (fun table -> Stack.push history table)
 
 let describe_token token =
-  if String.is_empty token then "end of input"
-  else Printf.sprintf "'%s'" token
+  if String.is_empty token then "end of input" else Printf.sprintf "'%s'" token
 
 let load_formula filepath =
   let parse channel =
@@ -50,7 +49,8 @@ let load_formula filepath =
         Error
           (Printf.sprintf
              "Parse error in %s at line %d, column %d: unexpected %s" filepath
-             line col (describe_token (Lexing.lexeme lexbuf)))
+             line col
+             (describe_token (Lexing.lexeme lexbuf)))
   in
   try In_channel.with_file filepath ~f:parse
   with Sys_error msg -> Error (Printf.sprintf "Cannot open file: %s" msg)
@@ -92,7 +92,8 @@ let parse_formula s =
         (Printf.sprintf
            "Parse error at column %d: unexpected %s. Check for missing \
             operands or unmatched parentheses."
-           col (describe_token (Lexing.lexeme lexbuf)))
+           col
+           (describe_token (Lexing.lexeme lexbuf)))
   | Parsing.Parse_error ->
       Error "Parse error: unexpected input. Check formula syntax."
 
