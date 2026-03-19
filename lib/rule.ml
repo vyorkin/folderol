@@ -61,3 +61,17 @@ let of_string = function
   | "∃L" | "ExistsL" -> Some ExistsL
   | "Cut" -> Some Cut
   | _ -> None
+
+(** Number of subgoals produced by each rule. *)
+let num_subgoals = function
+  | NotR | NotL -> 1
+  | ConjR -> 2
+  | ConjL -> 1
+  | DisjR -> 1
+  | DisjL -> 2
+  | ImplR -> 1
+  | ImplL -> 2
+  | IffR | IffL -> 2
+  | ForallR | ForallL -> 1
+  | ExistsL | ExistsR -> 1
+  | Cut -> 2

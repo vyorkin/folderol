@@ -1,7 +1,7 @@
 (executable
  (public_name folderol)
  (name main)
- (libraries cmdliner angstrom folderol.lib)
+ (libraries cmdliner angstrom linenoise folderol.lib)
  (preprocess
   (pps ppx_let)))
 

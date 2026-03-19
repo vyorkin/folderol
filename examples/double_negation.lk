@@ -1,0 +1,4 @@
+# Double Negation Introduction and Elimination
+# |- P --> ~~P
+
+|- P --> ~~P

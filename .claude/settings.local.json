@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -1 /Users/vyorkin/projects/opensource/folderol/lib/*.ml)",
+      "Bash(ls -1 /Users/vyorkin/projects/opensource/folderol/bin/*.ml)",
+      "Bash(dune build:*)",
+      "Bash(dune:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "WebFetch(domain:vyorkin.org)",
+      "Bash(x ocaml:*)",
+      "Bash(opam switch:*)",
+      "Bash(eval $(opam env):*)",
+      "Skill(update-config)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(grep -r \"not implemented\\\\|unimplemented\\\\|raise \\\\|failwith\\\\|assert false\" /Users/vyorkin/projects/opensource/folderol/lib --include=*.ml)",
+      "Bash(grep -r \"limitation\\\\|incomplete\\\\|FUTURE\\\\|IMPROVEMENT\\\\|NOTE\\\\|COMMENT\" /Users/vyorkin/projects/opensource/folderol/lib --include=*.ml -i)",
+      "Bash(git branch:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "mcp__github__get_pull_request",
+      "mcp__github__get_pull_request_status",
+      "Bash(gh run:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

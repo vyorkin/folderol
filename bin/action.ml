@@ -11,13 +11,18 @@ type t =
   | Step
   | StepN of int
   | Run
+  | RunN of int
   | Undo
   | Cut of string
   | Save of string
+  | SaveLatex of string
   | Apply of string
   | Clear
   | Print
   | Trace
+  | Tree
+  | Explain
+  | Hint
   | Help
   | Quit
 [@@deriving show { with_path = false }]
@@ -27,6 +32,9 @@ let history : Goal_table.t Stack.t = Stack.create ()
 
 let save_state () =
   Proof.with_goal_table (fun table -> Stack.push history table)
+
+let describe_token token =
+  if String.is_empty token then "end of input" else Printf.sprintf "'%s'" token
 
 let load_formula filepath =
   let parse channel =
@@ -40,10 +48,12 @@ let load_formula filepath =
         let col = pos.pos_cnum - pos.pos_bol in
         Error
           (Printf.sprintf
-             "Parse error in %s at line %d, column %d: unexpected token '%s'"
-             filepath line col (Lexing.lexeme lexbuf))
+             "Parse error in %s at line %d, column %d: unexpected %s" filepath
+             line col
+             (describe_token (Lexing.lexeme lexbuf)))
   in
-  In_channel.with_file filepath ~f:parse
+  try In_channel.with_file filepath ~f:parse
+  with Sys_error msg -> Error (Printf.sprintf "Cannot open file: %s" msg)
 
 let load_sequent filepath =
   let parse channel =
@@ -53,15 +63,16 @@ let load_sequent filepath =
     with Lexer.LexingError _ | FolderolParser.Error | Parsing.Parse_error ->
       Error "not a sequent"
   in
-  In_channel.with_file filepath ~f:parse
+  try In_channel.with_file filepath ~f:parse
+  with Sys_error _ -> Error "not a sequent"
 
 let load filepath =
   match load_sequent filepath with
   | Ok (gamma, delta) ->
+      let table = Goal_table.mk (gamma, delta) in
       Stack.clear history;
-      Proof.init (Goal_table.mk (gamma, delta));
-      let table_str = Goal_table.to_string (Goal_table.mk (gamma, delta)) in
-      print_endline table_str
+      Proof.init table;
+      print_endline (Goal_table.to_string table)
   | Error _ -> (
       match load_formula filepath with
       | Ok formula ->
@@ -78,9 +89,13 @@ let parse_formula s =
       let pos = lexbuf.lex_curr_p in
       let col = pos.pos_cnum - pos.pos_bol in
       Error
-        (Printf.sprintf "Parse error at position %d: unexpected token '%s'" col
-           (Lexing.lexeme lexbuf))
-  | Parsing.Parse_error -> Error "Parsing error"
+        (Printf.sprintf
+           "Parse error at column %d: unexpected %s. Check for missing \
+            operands or unmatched parentheses."
+           col
+           (describe_token (Lexing.lexeme lexbuf)))
+  | Parsing.Parse_error ->
+      Error "Parse error: unexpected input. Check formula syntax."
 
 let parse_sequent s =
   let lexbuf = Lexing.from_string s in
@@ -99,10 +114,10 @@ let read line =
   in
   match result with
   | Ok (gamma, delta) ->
+      let table = Goal_table.mk (gamma, delta) in
       Stack.clear history;
-      Proof.init (Goal_table.mk (gamma, delta));
-      let table_str = Goal_table.to_string (Goal_table.mk (gamma, delta)) in
-      print_endline table_str
+      Proof.init table;
+      print_endline (Goal_table.to_string table)
   | Error err -> print_endline err
 
 let readn lines =
@@ -130,15 +145,16 @@ let stepn n =
       ignore (Stack.pop history);
       print_endline err
 
-let run_proof () =
+let run_proof ?limit () =
   save_state ();
-  match Proof.run () with
+  match Proof.run ?limit () with
   | Ok table ->
       if Goal_table.is_empty table then print_endline "Proof complete!"
       else (
-        print_endline
-          (Printf.sprintf "Search stopped after %d steps. Remaining goals:"
-             Proof.default_depth_limit);
+        (match limit with
+        | Some n ->
+            Printf.printf "Search stopped after %d steps. Remaining goals:\n" n
+        | None -> print_endline "Search stopped. Remaining goals:");
         print_endline (Goal_table.to_string table))
   | Error err ->
       ignore (Stack.pop history);
@@ -186,6 +202,20 @@ let save_proof filepath =
       Out_channel.write_all filepath ~data:(content ^ "\n");
       print_endline (Printf.sprintf "Proof state saved to %s" filepath))
 
+let save_latex filepath =
+  match Proof.build_proof_tree () with
+  | None -> print_endline "No proof tree available to export."
+  | Some tree ->
+      let content = Proof_tree.to_latex tree in
+      let preamble =
+        "\\documentclass{article}\n\
+         \\usepackage{bussproofs}\n\
+         \\begin{document}\n"
+      in
+      let postamble = "\\end{document}\n" in
+      Out_channel.write_all filepath ~data:(preamble ^ content ^ postamble);
+      print_endline (Printf.sprintf "LaTeX proof tree saved to %s" filepath)
+
 let apply_tactic rule_str =
   match Rule.of_string rule_str with
   | None -> print_endline (Printf.sprintf "Unknown rule: %s" rule_str)
@@ -203,6 +233,7 @@ let apply_tactic rule_str =
 
 let print () = Proof.print_goal_table ()
 let trace () = Proof.print_proof_trace ()
+let tree () = Proof.print_proof_tree ()
 
 let clear () =
   Stack.clear history;
@@ -211,21 +242,26 @@ let clear () =
 
 let help () =
   print_endline "Available commands:";
-  print_endline "  load, l <file> - Load goal from file";
-  print_endline "  read <formula> - Read goal";
-  print_endline "  readn <f1> <f2> ... - Read multiple goals";
-  print_endline "  step, s        - Reduce goal (one step)";
-  print_endline "  stepn <n>      - Perform N steps at once";
-  print_endline "  run, r         - Run proof search";
-  print_endline "  apply <rule>   - Apply specific rule (e.g., apply ConjR)";
-  print_endline "  undo, u        - Undo last step";
-  print_endline "  cut <formula>  - Apply cut rule with formula";
-  print_endline "  save <file>    - Save proof state to file";
-  print_endline "  print, p       - Print goal table";
-  print_endline "  trace, t       - Show proof trace";
-  print_endline "  clear          - Clear all goals";
-  print_endline "  help, h        - Show this help text";
-  print_endline "  quit, q, exit  - Exit REPL"
+  print_endline "  load, l <file>    - Load goal from file";
+  print_endline "  read <formula>    - Read goal (formula or sequent)";
+  print_endline "  readn <f1> <f2>   - Read multiple goals";
+  print_endline "  step, s           - Reduce goal (one step)";
+  print_endline "  stepn <n>         - Perform N steps at once";
+  print_endline "  run, r            - Run proof search (default limit)";
+  print_endline "  run <n>           - Run proof search with limit N";
+  print_endline "  apply <rule>      - Apply specific rule (e.g., apply ConjR)";
+  print_endline "  undo, u           - Undo last step";
+  print_endline "  cut <formula>     - Apply cut rule with formula";
+  print_endline "  save <file>       - Save proof state to file";
+  print_endline "  save --latex <f>  - Export proof tree as LaTeX (bussproofs)";
+  print_endline "  print, p          - Print goal table";
+  print_endline "  trace, t          - Show proof trace";
+  print_endline "  tree              - Show proof tree (ASCII)";
+  print_endline "  explain, e        - Explain proof steps in plain English";
+  print_endline "  hint              - Suggest the next rule to apply";
+  print_endline "  clear             - Clear all goals";
+  print_endline "  help, h           - Show this help text";
+  print_endline "  quit, q, exit     - Exit REPL"
 
 let quit () = exit 0
 
@@ -237,12 +273,17 @@ let run = function
   | Step -> step ()
   | StepN n -> stepn n
   | Run -> run_proof ()
+  | RunN n -> run_proof ~limit:n ()
   | Undo -> undo ()
   | Apply rule_str -> apply_tactic rule_str
   | Cut formula_str -> apply_cut formula_str
   | Save filepath -> save_proof filepath
+  | SaveLatex filepath -> save_latex filepath
   | Print -> print ()
   | Trace -> trace ()
+  | Tree -> tree ()
+  | Explain -> Explain.explain ()
+  | Hint -> Hint.hint ()
   | Clear -> clear ()
   | Help -> help ()
   | Quit -> quit ()

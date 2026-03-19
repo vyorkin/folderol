@@ -1,0 +1,6 @@
+# Demo: prove De Morgan's law and display the proof
+load examples/de_morgan.lk
+run
+tree
+explain
+quit

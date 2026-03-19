@@ -7,7 +7,7 @@ let cmd_repl =
   Cmd.(v (info "repl" ~doc))
   @@
   let+ () = Term.const () in
-  Repl.(run (prompt_seq ()));
+  Repl.(run_interactive (prompt_seq ()));
   Cmdliner.Cmd.Exit.ok
 
 let cmd_file =

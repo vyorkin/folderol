@@ -374,4 +374,28 @@ let () =
           test_case "with # comments" `Quick
             Proof_test.test_parse_with_hash_comments;
         ] );
+      ( "Proof tree",
+        [
+          test_case "simple P → P" `Quick Proof_test.test_proof_tree_simple;
+          test_case "conjunction swap" `Quick Proof_test.test_proof_tree_conj;
+          test_case "None when empty" `Quick
+            Proof_test.test_proof_tree_none_when_empty;
+        ] );
+      ( "Proof tree: LaTeX",
+        [ test_case "LaTeX export" `Quick Proof_test.test_latex_export ] );
+      ( "Proof trace: principal",
+        [
+          test_case "trace has principal formula" `Quick
+            Proof_test.test_trace_has_principal;
+          test_case "trace records num_subgoals" `Quick
+            Proof_test.test_trace_num_subgoals;
+        ] );
+      ( "Rule: num_subgoals",
+        [ test_case "subgoal counts" `Quick Proof_test.test_rule_num_subgoals ]
+      );
+      ( "Proof: error messages",
+        [
+          test_case "depth limit error" `Quick
+            Proof_test.test_run_depth_limit_error;
+        ] );
     ]

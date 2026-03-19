@@ -1,0 +1,4 @@
+# De Morgan's Laws
+# |- ~(P & Q) --> (~P | ~Q)
+
+|- ~(P & Q) --> (~P | ~Q)

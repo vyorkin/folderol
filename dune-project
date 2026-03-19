@@ -19,7 +19,10 @@
  (depends
   (ocaml
    (>= 5.3))
-  (alcotest :with-test)
+  (alcotest
+   (and
+    :with-test
+    (>= 1.9)))
   (core :build)
   ppx_let
   (ppx_deriving
@@ -27,8 +30,7 @@
   (cmdliner (>= 1.3))
   (angstrom
    (>= 0.16))
-  (alcotest
-   (>= 1.9))
+  linenoise
   (menhir
    (and
     :build

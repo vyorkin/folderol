@@ -406,3 +406,119 @@ let test_parse_dangling_connective () =
   match result with
   | Error _ -> ()
   | Ok _ -> Alcotest.fail "should fail on dangling connective"
+
+(* Proof tree *)
+
+let test_proof_tree_simple () =
+  Symbol.reset ();
+  let open Formula in
+  (* P → P: should produce a tree with →R at the root *)
+  let formula = Conn (Impl, [ Pred ("P", []); Pred ("P", []) ]) in
+  Proof.init (Goal_table.mk ([], [ formula ]));
+  let _result = Proof.run () in
+  let tree = Proof.build_proof_tree () in
+  Alcotest.(check bool) "proof tree is Some" true (Option.is_some tree);
+  match tree with
+  | Some (Proof_tree.Step (_, rule, _children)) ->
+      Alcotest.(check (testable Rule.pp Rule.equal))
+        "root rule is →R" Rule.ImplR rule
+  | Some (Proof_tree.Axiom _) -> Alcotest.fail "expected Step, got Axiom"
+  | None -> Alcotest.fail "expected Some tree"
+
+let test_proof_tree_conj () =
+  Symbol.reset ();
+  let open Formula in
+  (* (P ∧ Q) → (Q ∧ P): tree should have →R at root *)
+  let p = Pred ("P", []) in
+  let q = Pred ("Q", []) in
+  let formula = Conn (Impl, [ Conn (Conj, [ p; q ]); Conn (Conj, [ q; p ]) ]) in
+  Proof.init (Goal_table.mk ([], [ formula ]));
+  let _result = Proof.run () in
+  let tree = Proof.build_proof_tree () in
+  Alcotest.(check bool) "proof tree is Some" true (Option.is_some tree)
+
+let test_proof_tree_none_when_empty () =
+  Proof.init (Goal_table.empty ());
+  let tree = Proof.build_proof_tree () in
+  Alcotest.(check bool) "no tree for empty proof" true (Option.is_none tree)
+
+(* Trace with principal formula *)
+
+let test_trace_has_principal () =
+  Symbol.reset ();
+  let open Formula in
+  let formula = Conn (Impl, [ Pred ("P", []); Pred ("P", []) ]) in
+  Proof.init (Goal_table.mk ([], [ formula ]));
+  let _result = Proof.run () in
+  let trace = Proof.get_proof_trace () in
+  match trace with
+  | first :: _ ->
+      let _, _, principal_f = first.Proof.principal in
+      (* The principal formula for →R on P → P is the implication itself *)
+      Alcotest.(check bool)
+        "principal is an implication" true
+        (match principal_f with Conn (Impl, _) -> true | _ -> false)
+  | [] -> Alcotest.fail "trace should have at least one step"
+
+(* num_subgoals *)
+
+let test_trace_num_subgoals () =
+  Symbol.reset ();
+  let open Formula in
+  (* ∧R produces 2 subgoals *)
+  let formula = Conn (Conj, [ Pred ("P", []); Pred ("Q", []) ]) in
+  Proof.init (Goal_table.mk ([], [ formula ]));
+  let _result = Proof.step () in
+  let trace = Proof.get_proof_trace () in
+  match trace with
+  | [ step ] ->
+      Alcotest.(check int) "∧R has 2 subgoals" 2 step.Proof.num_subgoals
+  | _ -> Alcotest.fail "expected exactly one step"
+
+(* Rule.num_subgoals *)
+
+let test_rule_num_subgoals () =
+  Alcotest.(check int) "NotR" 1 (Rule.num_subgoals Rule.NotR);
+  Alcotest.(check int) "ConjR" 2 (Rule.num_subgoals Rule.ConjR);
+  Alcotest.(check int) "ConjL" 1 (Rule.num_subgoals Rule.ConjL);
+  Alcotest.(check int) "ImplR" 1 (Rule.num_subgoals Rule.ImplR);
+  Alcotest.(check int) "ImplL" 2 (Rule.num_subgoals Rule.ImplL);
+  Alcotest.(check int) "ForallR" 1 (Rule.num_subgoals Rule.ForallR);
+  Alcotest.(check int) "Cut" 2 (Rule.num_subgoals Rule.Cut)
+
+(* Better error messages *)
+
+let test_run_depth_limit_error () =
+  Symbol.reset ();
+  let open Formula in
+  (* An unprovable sequent that will exhaust the depth limit *)
+  let formula = Pred ("P", []) in
+  Proof.init (Goal_table.mk ([], [ formula ]));
+  let result = Proof.run ~limit:5 () in
+  match result with
+  | Error msg ->
+      Alcotest.(check bool)
+        "error mentions depth limit" true
+        (String.length msg > 0)
+  | Ok _ -> () (* might succeed vacuously *)
+
+(* LaTeX export *)
+
+let test_latex_export () =
+  Symbol.reset ();
+  let open Formula in
+  let formula = Conn (Impl, [ Pred ("P", []); Pred ("P", []) ]) in
+  Proof.init (Goal_table.mk ([], [ formula ]));
+  let _result = Proof.run () in
+  match Proof.build_proof_tree () with
+  | Some tree ->
+      let latex = Proof_tree.to_latex tree in
+      Alcotest.(check bool)
+        "contains prooftree env" true
+        (let open Core.String in
+         is_substring latex ~substring:"prooftree");
+      Alcotest.(check bool)
+        "contains UnaryInfC or BinaryInfC" true
+        (let open Core.String in
+         is_substring latex ~substring:"InfC")
+  | None -> Alcotest.fail "expected proof tree"

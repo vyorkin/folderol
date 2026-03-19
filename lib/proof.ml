@@ -5,8 +5,15 @@ let default_depth_limit = 100
 let goal_table = ref (Goal_table.empty ())
 let proof_trees : Proof_tree.t list ref = ref []
 
-type proof_step = { goal : Goal.t; rule : Rule.t; solved : Formula.t list }
-(** A single proof step recording what rule was applied and what was solved. *)
+type proof_step = {
+  goal : Goal.t;
+  rule : Rule.t;
+  principal : Goal_entry.t;
+  solved : Formula.t list;
+  num_subgoals : int;
+}
+(** A single proof step recording what rule was applied, the principal formula
+    that was decomposed, and what was solved. *)
 
 let proof_trace : proof_step list ref = ref []
 
@@ -56,12 +63,20 @@ let run_step = function
         Ok table)
       else
         let%bind rule, subgoals = Goal.reduce goal goal_entry in
+        let num_subgoals = List.length subgoals in
         let formulas, table' = Goal_table.insert_goals table (subgoals, []) in
         print_step rule goal_entry formulas;
         proof_trace :=
-          { goal = full_goal; rule; solved = formulas } :: !proof_trace;
+          {
+            goal = full_goal;
+            rule;
+            principal = goal_entry;
+            solved = formulas;
+            num_subgoals;
+          }
+          :: !proof_trace;
         (* Cache if all subgoals were immediately solved *)
-        if List.length table' <= List.length table then cache_goal full_goal;
+        if num_subgoals = List.length formulas then cache_goal full_goal;
         Ok table'
 
 (** Like [run_step] but returns alternative goal tables from different unifier
@@ -80,6 +95,7 @@ let run_step_with_alternatives = function
         match Goal.reduce goal goal_entry with
         | Error e -> (Error e, [])
         | Ok (rule, subgoals) ->
+            let num_subgoals = List.length subgoals in
             let all = Goal_table.insert_goals_all table (subgoals, []) in
             let primary, alternatives =
               match all with
@@ -89,8 +105,15 @@ let run_step_with_alternatives = function
             let formulas, table' = primary in
             print_step rule goal_entry formulas;
             proof_trace :=
-              { goal = full_goal; rule; solved = formulas } :: !proof_trace;
-            if List.length table' <= List.length table then cache_goal full_goal;
+              {
+                goal = full_goal;
+                rule;
+                principal = goal_entry;
+                solved = formulas;
+                num_subgoals;
+              }
+              :: !proof_trace;
+            if num_subgoals = List.length formulas then cache_goal full_goal;
             (Ok table', List.map alternatives ~f:snd))
 
 type choice_point = { table : Goal_table.t; remaining : int }
@@ -104,12 +127,25 @@ let rec run_steps table n =
       let%bind table' = run_step table in
       run_steps table' (i - 1)
 
+(** Proof search failure reasons. *)
+type failure_reason = Depth_limit_reached of int | Exhausted_alternatives
+
+let failure_reason_to_string = function
+  | Depth_limit_reached limit ->
+      Printf.sprintf
+        "Depth limit reached (%d steps). Try increasing the limit with 'run \
+         <N>'."
+        limit
+  | Exhausted_alternatives ->
+      "Proof search exhausted all alternatives (backtracking found no \
+       solution)."
+
 (** Run proof search with backtracking. When a branch fails (reduce error),
     backtracks to try alternative unifier choices from previous steps. *)
-let rec run_steps_bt table n choice_points =
+let rec run_steps_bt table n limit choice_points =
   match (table, n) with
   | [], _ -> Ok []
-  | _, 0 -> Ok table
+  | _, 0 -> Error (Depth_limit_reached limit)
   | _, i -> (
       let primary, alternatives = run_step_with_alternatives table in
       (* Save alternatives as choice points *)
@@ -118,12 +154,12 @@ let rec run_steps_bt table n choice_points =
             { table = alt_table; remaining = i - 1 } :: acc)
       in
       match primary with
-      | Ok table' -> run_steps_bt table' (i - 1) choice_points'
-      | Error _ -> backtrack choice_points')
+      | Ok table' -> run_steps_bt table' (i - 1) limit choice_points'
+      | Error _ -> backtrack limit choice_points')
 
-and backtrack = function
-  | [] -> Error "Proof search exhausted all alternatives"
-  | { table; remaining } :: rest -> run_steps_bt table remaining rest
+and backtrack limit = function
+  | [] -> Error Exhausted_alternatives
+  | { table; remaining } :: rest -> run_steps_bt table remaining limit rest
 
 (** Apply a specific rule to the current goal. Finds the first goal entry that
     reduces with the given rule and applies it. *)
@@ -142,12 +178,19 @@ let apply_rule target_rule = function
             let remaining = List.rev tried @ rest in
             match Goal.reduce remaining entry with
             | Ok (rule, subgoals) when Rule.equal rule target_rule ->
+                let num_subgoals = List.length subgoals in
                 let formulas, table' =
                   Goal_table.insert_goals table (subgoals, [])
                 in
                 print_step rule entry formulas;
                 proof_trace :=
-                  { goal = all_entries; rule; solved = formulas }
+                  {
+                    goal = all_entries;
+                    rule;
+                    principal = entry;
+                    solved = formulas;
+                    num_subgoals;
+                  }
                   :: !proof_trace;
                 Ok table'
             | _ -> try_entries (entry :: tried) rest)
@@ -165,9 +208,11 @@ let steps n =
   Ok table
 
 let run ?(limit = default_depth_limit) () =
-  let%bind table = run_steps_bt !goal_table limit [] in
-  goal_table := table;
-  Ok table
+  match run_steps_bt !goal_table limit limit [] with
+  | Ok table ->
+      goal_table := table;
+      Ok table
+  | Error reason -> Error (failure_reason_to_string reason)
 
 let with_goal_table f = f !goal_table
 let get_proof_trees () = !proof_trees
@@ -179,10 +224,13 @@ let print_proof_trace () =
   let trace = get_proof_trace () in
   if List.is_empty trace then print_endline "No proof steps recorded."
   else (
-    List.iteri trace ~f:(fun i { goal; rule; solved } ->
+    List.iteri trace ~f:(fun i { goal; rule; principal; solved; _ } ->
         let goal_str = Goal.to_string goal in
         let rule_str = Rule.to_string rule in
-        Printf.printf "%d. [%s] %s" (i + 1) rule_str goal_str;
+        let _, _, principal_formula = principal in
+        let principal_str = Formula.to_string principal_formula in
+        Printf.printf "%d. [%s] %s  {on: %s}" (i + 1) rule_str goal_str
+          principal_str;
         (match solved with
         | [] -> ()
         | fs ->
@@ -193,3 +241,43 @@ let print_proof_trace () =
     if hits > 0 then
       Printf.printf "(%d lemma cache hit%s)\n" hits
         (if hits = 1 then "" else "s"))
+
+(** Reconstruct a proof tree from the proof trace. Uses a stack-based approach
+    that assumes approximately depth-first processing order. *)
+let build_proof_tree () =
+  let trace = get_proof_trace () in
+  if List.is_empty trace then None
+  else
+    let trace_arr = Array.of_list trace in
+    let pos = ref 0 in
+    let len = Array.length trace_arr in
+    let rec build () =
+      if !pos >= len then None
+      else
+        let step = trace_arr.(!pos) in
+        Int.incr pos;
+        let num_unsolved = step.num_subgoals - List.length step.solved in
+        let axiom_children =
+          List.map step.solved ~f:(fun f -> Proof_tree.Axiom (step.goal, f))
+        in
+        let unsolved_children = build_n num_unsolved in
+        Some
+          (Proof_tree.Step
+             (step.goal, step.rule, axiom_children @ unsolved_children))
+    and build_n n =
+      if n <= 0 then []
+      else
+        match build () with
+        | None -> []
+        | Some tree ->
+            let rest = build_n (n - 1) in
+            tree :: rest
+    in
+    let tree = build () in
+    (match tree with Some t -> proof_trees := [ t ] | None -> ());
+    tree
+
+let print_proof_tree () =
+  match build_proof_tree () with
+  | None -> print_endline "No proof tree available."
+  | Some tree -> print_endline (Proof_tree.to_string_ascii tree)
