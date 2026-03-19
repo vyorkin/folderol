@@ -33,6 +33,10 @@ let history : Goal_table.t Stack.t = Stack.create ()
 let save_state () =
   Proof.with_goal_table (fun table -> Stack.push history table)
 
+let describe_token token =
+  if String.is_empty token then "end of input"
+  else Printf.sprintf "'%s'" token
+
 let load_formula filepath =
   let parse channel =
     let lexbuf = Lexing.from_channel channel in
@@ -43,15 +47,10 @@ let load_formula filepath =
         let pos = lexbuf.lex_curr_p in
         let line = pos.pos_lnum in
         let col = pos.pos_cnum - pos.pos_bol in
-        let token = Lexing.lexeme lexbuf in
-        let token_desc =
-          if String.is_empty token then "end of input"
-          else Printf.sprintf "'%s'" token
-        in
         Error
           (Printf.sprintf
              "Parse error in %s at line %d, column %d: unexpected %s" filepath
-             line col token_desc)
+             line col (describe_token (Lexing.lexeme lexbuf)))
   in
   try In_channel.with_file filepath ~f:parse
   with Sys_error msg -> Error (Printf.sprintf "Cannot open file: %s" msg)
@@ -70,10 +69,10 @@ let load_sequent filepath =
 let load filepath =
   match load_sequent filepath with
   | Ok (gamma, delta) ->
+      let table = Goal_table.mk (gamma, delta) in
       Stack.clear history;
-      Proof.init (Goal_table.mk (gamma, delta));
-      let table_str = Goal_table.to_string (Goal_table.mk (gamma, delta)) in
-      print_endline table_str
+      Proof.init table;
+      print_endline (Goal_table.to_string table)
   | Error _ -> (
       match load_formula filepath with
       | Ok formula ->
@@ -89,16 +88,11 @@ let parse_formula s =
   | FolderolParser.Error ->
       let pos = lexbuf.lex_curr_p in
       let col = pos.pos_cnum - pos.pos_bol in
-      let token = Lexing.lexeme lexbuf in
-      let token_desc =
-        if String.is_empty token then "end of input"
-        else Printf.sprintf "'%s'" token
-      in
       Error
         (Printf.sprintf
            "Parse error at column %d: unexpected %s. Check for missing \
             operands or unmatched parentheses."
-           col token_desc)
+           col (describe_token (Lexing.lexeme lexbuf)))
   | Parsing.Parse_error ->
       Error "Parse error: unexpected input. Check formula syntax."
 
@@ -119,10 +113,10 @@ let read line =
   in
   match result with
   | Ok (gamma, delta) ->
+      let table = Goal_table.mk (gamma, delta) in
       Stack.clear history;
-      Proof.init (Goal_table.mk (gamma, delta));
-      let table_str = Goal_table.to_string (Goal_table.mk (gamma, delta)) in
-      print_endline table_str
+      Proof.init table;
+      print_endline (Goal_table.to_string table)
   | Error err -> print_endline err
 
 let readn lines =
@@ -150,27 +144,16 @@ let stepn n =
       ignore (Stack.pop history);
       print_endline err
 
-let run_proof () =
+let run_proof ?limit () =
   save_state ();
-  match Proof.run () with
+  match Proof.run ?limit () with
   | Ok table ->
       if Goal_table.is_empty table then print_endline "Proof complete!"
       else (
-        print_endline "Search stopped. Remaining goals:";
-        print_endline (Goal_table.to_string table))
-  | Error err ->
-      ignore (Stack.pop history);
-      print_endline err
-
-let run_proof_n limit =
-  save_state ();
-  match Proof.run ~limit () with
-  | Ok table ->
-      if Goal_table.is_empty table then print_endline "Proof complete!"
-      else (
-        print_endline
-          (Printf.sprintf "Search stopped after %d steps. Remaining goals:"
-             limit);
+        (match limit with
+        | Some n ->
+            Printf.printf "Search stopped after %d steps. Remaining goals:\n" n
+        | None -> print_endline "Search stopped. Remaining goals:");
         print_endline (Goal_table.to_string table))
   | Error err ->
       ignore (Stack.pop history);
@@ -289,7 +272,7 @@ let run = function
   | Step -> step ()
   | StepN n -> stepn n
   | Run -> run_proof ()
-  | RunN n -> run_proof_n n
+  | RunN n -> run_proof ~limit:n ()
   | Undo -> undo ()
   | Apply rule_str -> apply_tactic rule_str
   | Cut formula_str -> apply_cut formula_str

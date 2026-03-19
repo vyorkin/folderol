@@ -76,7 +76,7 @@ let run_step = function
           }
           :: !proof_trace;
         (* Cache if all subgoals were immediately solved *)
-        if List.length table' <= List.length table then cache_goal full_goal;
+        if num_subgoals = List.length formulas then cache_goal full_goal;
         Ok table'
 
 (** Like [run_step] but returns alternative goal tables from different unifier
@@ -113,7 +113,7 @@ let run_step_with_alternatives = function
                 num_subgoals;
               }
               :: !proof_trace;
-            if List.length table' <= List.length table then cache_goal full_goal;
+            if num_subgoals = List.length formulas then cache_goal full_goal;
             (Ok table', List.map alternatives ~f:snd))
 
 type choice_point = { table : Goal_table.t; remaining : int }

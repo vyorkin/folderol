@@ -98,11 +98,12 @@ let explain_step i (step : Proof.proof_step) =
 (** Print a full natural-language explanation of the proof. *)
 let explain () =
   let trace = Proof.get_proof_trace () in
-  if List.length trace = 0 then print_endline "No proof steps to explain."
-  else (
-    print_endline "Proof explanation:";
-    print_endline (String.make 40 '-');
-    List.iteri (fun i step -> print_endline (explain_step i step)) trace;
-    print_endline (String.make 40 '-');
-    let n = List.length trace in
-    Printf.printf "Total: %d step%s\n" n (if n = 1 then "" else "s"))
+  match trace with
+  | [] -> print_endline "No proof steps to explain."
+  | _ ->
+      print_endline "Proof explanation:";
+      print_endline (String.make 40 '-');
+      let n = List.length trace in
+      List.iteri (fun i step -> print_endline (explain_step i step)) trace;
+      print_endline (String.make 40 '-');
+      Printf.printf "Total: %d step%s\n" n (if n = 1 then "" else "s")
