@@ -2,11 +2,12 @@
  (public_name folderol)
  (name main)
  (libraries cmdliner angstrom folderol.lib)
- (preprocess (pps ppx_let)))
+ (preprocess
+  (pps ppx_let)))
 
 (env
  (dev
   (flags
    (:standard -warn-error -A)))
  (release
-  (ocamlopt_flags :standard -ccopt -static)))
+  (ocamlopt_flags :standard)))

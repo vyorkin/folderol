@@ -1,1 +1,2 @@
+-- Associativity of biconditional
 ((P <-> Q) <-> R) |- (P <-> (Q <-> R))

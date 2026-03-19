@@ -18,6 +18,7 @@ let string = ['a'-'z' 'A'-'Z']+
 rule read = parse
   | whitespaces { read lexbuf }
   | newline { new_line lexbuf; read lexbuf }
+  | "#" [^ '\n' '\r']* { read lexbuf }
 
   | "(" { LPAREN }
   | ")" { RPAREN }
@@ -29,6 +30,7 @@ rule read = parse
   | "∧" | "&" { CONJ }
   | "∨" | "|" { DISJ }
   | "→" | "-->" { IMPL }
+  | "-- " [^ '\n' '\r']* { read lexbuf }
   | "↔" | "<->" { IFF }
   | "¬" | "~" { NOT }
   | "∀" | "FORALL" { FORALL }

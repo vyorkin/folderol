@@ -1,13 +1,18 @@
 open Core
+module ReplParser = Parser
 
 let print_error s =
   Out_channel.eprintf "Error:\n%s\n" s;
   Out_channel.flush stderr
 
-let prompt = "Γ|-∆> "
+let prompt () =
+  FolderolLib.Proof.with_goal_table (fun table ->
+      let n = List.length table in
+      if n = 0 then "folderol> "
+      else Printf.sprintf "folderol[%d goal%s]> " n (if n = 1 then "" else "s"))
 
 let prompt_repl () =
-  Out_channel.printf "%s%!" prompt;
+  Out_channel.printf "%s%!" (prompt ());
   match In_channel.input_line In_channel.stdin with
   | Some line -> Some (line, ())
   | None -> None
@@ -31,7 +36,7 @@ let file_seq filename =
   Sequence.unfold ~init:channel ~f:file_repl
 
 let process_line line =
-  match Parser.parse_line line with
+  match ReplParser.parse_line line with
   | Error e -> print_error e
   | Ok action -> Action.run action
 

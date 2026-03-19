@@ -18,6 +18,8 @@ type t =
   | ForallL
   | ExistsL
   | ExistsR
+  (* Structural rule. *)
+  | Cut
 [@@deriving eq, show { with_path = false }]
 
 let pp fmt rule =
@@ -37,5 +39,25 @@ let pp fmt rule =
   | ForallL -> fprintf fmt "∀L"
   | ExistsL -> fprintf fmt "∃L"
   | ExistsR -> fprintf fmt "∃R"
+  | Cut -> fprintf fmt "Cut"
 
 let to_string = format_to_string pp
+
+(** Parse a rule name from a string. Accepts both Unicode and ASCII forms. *)
+let of_string = function
+  | "¬R" | "~R" | "NotR" -> Some NotR
+  | "¬L" | "~L" | "NotL" -> Some NotL
+  | "∧R" | "&R" | "ConjR" -> Some ConjR
+  | "∧L" | "&L" | "ConjL" -> Some ConjL
+  | "∨R" | "|R" | "DisjR" -> Some DisjR
+  | "∨L" | "|L" | "DisjL" -> Some DisjL
+  | "→R" | "ImplR" -> Some ImplR
+  | "→L" | "ImplL" -> Some ImplL
+  | "↔R" | "IffR" -> Some IffR
+  | "↔L" | "IffL" -> Some IffL
+  | "∀R" | "ForallR" -> Some ForallR
+  | "∀L" | "ForallL" -> Some ForallL
+  | "∃R" | "ExistsR" -> Some ExistsR
+  | "∃L" | "ExistsL" -> Some ExistsL
+  | "Cut" -> Some Cut
+  | _ -> None

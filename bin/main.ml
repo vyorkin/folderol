@@ -14,8 +14,10 @@ let cmd_file =
   let doc = "Use file as REPL input" in
   Cmd.(v (info "file" ~doc))
   @@
-  let+ () = Term.const () in
-  Repl.(run (file_seq "file.flr"));
+  let+ filename =
+    Arg.(required & pos 0 (some string) None & info [] ~docv:"FILE")
+  in
+  Repl.(run (file_seq filename));
   Cmdliner.Cmd.Exit.ok
 
 let cmd_main =

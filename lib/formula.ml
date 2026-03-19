@@ -78,9 +78,10 @@ let rec pp_formula fmt = function
         (Format.pp_print_list ~pp_sep:pp_comma Term.pp_term)
         terms
   | Conn (connective, subformulas) -> (
-      match connective with
-      | Not -> pp_not fmt (List.hd_exn subformulas)
-      | conn ->
+      match (connective, subformulas) with
+      | Not, [ f ] -> pp_not fmt f
+      | Not, _ -> Format.fprintf fmt "~(invalid)"
+      | conn, _ ->
           Format.open_vbox 0;
           (Format.pp_print_list
              ~pp_sep:(fun fmt () ->

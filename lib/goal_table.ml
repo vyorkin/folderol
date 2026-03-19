@@ -5,6 +5,7 @@ open Instantiation
 type t = Goal.t list
 
 let empty () = []
+let is_empty = List.is_empty
 
 let mk (l, r) =
   let mk_goals side = List.map ~f:(Goal_entry.mk side) in
@@ -27,6 +28,21 @@ let rec insert_goals table = function
       | [] ->
           (* Not solvable, add as is. *)
           insert_goals (g :: table) (gs, fs))
+
+(** Like [insert_goals] but returns all possible outcomes by trying each
+    available unifier. Used for backtracking when the first choice leads to a
+    dead end. *)
+let rec insert_goals_all table = function
+  | [], fs -> [ (fs, table) ]
+  | g :: gs, fs -> (
+      match Goal.solve g with
+      | [] -> insert_goals_all (g :: table) (gs, fs)
+      | solutions ->
+          List.concat_map solutions ~f:(fun (f, u) ->
+              let goal_table' = instantiate_goals u table in
+              let f' = instantiate_formula u f in
+              let gs' = instantiate_goals u gs in
+              insert_goals_all goal_table' (gs', f' :: fs)))
 
 let pp fmt goal_table =
   let open Format in

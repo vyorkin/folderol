@@ -1,1 +1,2 @@
+-- Distributivity of disjunction over conjunction
 ((P | Q) & (P | R)) --> (P | (Q & R))

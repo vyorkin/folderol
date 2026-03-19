@@ -236,10 +236,14 @@ let test_solve_multiple_unification () =
     ]
   in
   let result = Goal.solve goal in
-  let expected_unifier = Env.mk [ ("x", Bound 42) ] in
-  let expected = [ (Pred ("P", [ Var "x" ]), expected_unifier) ] in
+  let expected =
+    [
+      (Pred ("P", [ Var "x" ]), Env.mk [ ("x", Bound 42) ]);
+      (Pred ("P", [ Var "x" ]), Env.mk [ ("x", Bound 43) ]);
+    ]
+  in
   Alcotest.(check (list (pair formula_testable env_testable)))
-    "solve: handles multiple unification possibilities" expected result
+    "solve: returns all unification possibilities" expected result
 
 let test_solve_nested_terms () =
   let open Formula in

@@ -299,4 +299,79 @@ let () =
           test_case "multiple goals" `Quick
             Goal_table_test.test_to_string_multiple_goals;
         ] );
+      ( "Proof: step",
+        [
+          test_case "reduces single connective" `Quick
+            Proof_test.test_step_reduces_single_connective;
+          test_case "solves via reduction" `Quick
+            Proof_test.test_step_solves_via_reduction;
+          test_case "empty goal table" `Quick
+            Proof_test.test_step_error_on_empty_goal_table;
+        ] );
+      ( "Proof: steps",
+        [
+          test_case "multiple reductions" `Quick
+            Proof_test.test_steps_multiple_reductions;
+          test_case "zero steps is noop" `Quick
+            Proof_test.test_steps_zero_is_noop;
+        ] );
+      ( "Proof: integration",
+        [
+          test_case "P → P" `Quick Proof_test.test_prove_implication_reflexivity;
+          test_case "P → ¬¬P" `Quick Proof_test.test_prove_double_negation_intro;
+          test_case "contrapositive" `Quick Proof_test.test_prove_contrapositive;
+          test_case "De Morgan 1" `Quick Proof_test.test_prove_de_morgan_1;
+          test_case "excluded middle" `Quick
+            Proof_test.test_prove_excluded_middle;
+          test_case "distributivity" `Quick
+            Proof_test.test_prove_distrib_from_file;
+          test_case "iff associativity" `Quick Proof_test.test_prove_assoc_iff;
+        ] );
+      ( "Proof: cut rule",
+        [
+          test_case "cut produces two subgoals" `Quick Proof_test.test_cut_rule;
+        ] );
+      ( "Proof: depth limit",
+        [
+          test_case "run with default limit" `Quick
+            Proof_test.test_run_with_default_limit;
+          test_case "run with small limit" `Quick
+            Proof_test.test_run_with_small_limit;
+        ] );
+      ( "Proof: backtracking",
+        [
+          test_case "alternative unifier" `Quick
+            Proof_test.test_backtracking_alternative_unifier;
+          test_case "quantifier" `Quick Proof_test.test_backtracking_quantifier;
+        ] );
+      ( "Proof: trace",
+        [ test_case "records proof steps" `Quick Proof_test.test_proof_trace ]
+      );
+      ( "Proof: apply rule",
+        [
+          test_case "applies specific rule" `Quick
+            Proof_test.test_apply_rule_specific;
+          test_case "fails on wrong rule" `Quick
+            Proof_test.test_apply_rule_wrong_rule;
+        ] );
+      ( "Rule: of_string",
+        [ test_case "parses rule names" `Quick Proof_test.test_rule_of_string ]
+      );
+      ( "Proof: lemma cache",
+        [
+          test_case "caches repeated subgoals" `Quick
+            Proof_test.test_lemma_cache;
+        ] );
+      ( "Parser: negative",
+        [
+          test_case "invalid syntax" `Quick Proof_test.test_parse_invalid_syntax;
+          test_case "unclosed paren" `Quick Proof_test.test_parse_unclosed_paren;
+          test_case "empty input" `Quick Proof_test.test_parse_empty_input;
+          test_case "dangling connective" `Quick
+            Proof_test.test_parse_dangling_connective;
+          test_case "with -- comments" `Quick
+            Proof_test.test_parse_with_comments;
+          test_case "with # comments" `Quick
+            Proof_test.test_parse_with_hash_comments;
+        ] );
     ]

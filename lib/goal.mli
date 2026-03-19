@@ -68,20 +68,12 @@ val split : t -> Formula.t list * Formula.t list
 
 val solve : t -> (Formula.t * unifier) list
 (** Attempts to solve the given [goal] by iterating over atomic formulas from
-    its left-hand side (∆) and right-hand side (Γ).
+    its left-hand side (Γ) and right-hand side (Δ).
 
-    The process involves:
-    - Splitting the goal into left and right formulas.
-    - Filtering for atomic formulas on both sides.
-    - For each atomic formula on the left, finding a unifiable counterpart on
-      the right.
-
-    If a pair is unifiable, it returns a list containing the atomic formula and
-    its unifier. If no unifiable pairs are found, it tries the next left
-    formula. If all pairs fail, the function returns an empty list.
-
-    The function prioritizes finding the first solution, returning as soon as a
-    unifier is identified. *)
+    Returns ALL possible (formula, unifier) pairs by trying every combination of
+    left and right atomic predicates. The first solution is tried by default
+    during proof search, but alternatives are available for backtracking when
+    the first choice leads to a dead end. *)
 
 val variable_names : init:string list -> t -> string list
 (** Collects distinct variable names in a formula. Named [vars_in_goal] in the
@@ -92,6 +84,10 @@ val reduce : t -> Goal_entry.t -> (Rule.t * t list, string) result
     subformulas to build subgoals.
 
     @return A list of subgoals and the rule that was applied. *)
+
+val cut : t -> Formula.t -> (Rule.t * t list, string) result
+(** Apply the cut rule with the given formula. Given goal Γ ⊢ Δ and cut formula
+    A, produces subgoals Γ ⊢ A, Δ and Γ, A ⊢ Δ. *)
 
 val pp_goal_entries : Format.formatter -> t -> unit
 

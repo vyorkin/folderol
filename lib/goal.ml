@@ -82,19 +82,11 @@ let solve goal =
   let filter_pred = List.filter ~f:Formula.is_pred in
   let lfs, rfs = split goal in
   let lps, rps = (filter_pred lfs, filter_pred rfs) in
-  let rec solve' = function
-    | [], _ -> []
-    | lp :: lps', rps ->
-        let rec find_unifier = function
-          | [] -> solve' (lps', rps)
-          | rp :: rps' -> (
-              match unify Env.empty (lp, rp) with
-              | Some u -> [ (lp, u) ] (* return formula and the unifier *)
-              | None -> find_unifier rps' (* keep searching in ∆ *))
-        in
-        find_unifier rps
-  in
-  solve' (lps, rps)
+  List.concat_map lps ~f:(fun lp ->
+      List.filter_map rps ~f:(fun rp ->
+          match unify Env.empty (lp, rp) with
+          | Some u -> Some (lp, u)
+          | None -> None))
 
 (** For rules [\forall R] and [\exists L] it generates a fresh parameter and
     attaches all the variables in the goal.
@@ -202,6 +194,13 @@ let reduce goal entry =
              (Formula.to_string formula))
   in
   reduce_goal entry
+
+let cut goal cut_formula =
+  let push_subgoals = mk_subgoals goal in
+  Ok
+    ( Rule.Cut,
+      push_subgoals
+        [ [ (Formula.R, cut_formula) ]; [ (Formula.L, cut_formula) ] ] )
 
 let pp_goal_entries fmt goal =
   let open Format in

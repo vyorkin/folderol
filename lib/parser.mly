@@ -24,6 +24,7 @@
 %right NOT
 
 %start <Formula.t> main
+%start <Formula.t list * Formula.t list> sequent
 %{
   open Formula
   open Term
@@ -32,6 +33,12 @@
 
 main:
   | formula EOF { $1 }
+  ;
+
+sequent:
+  | formula TURNSTYLE formula EOF { ([$1], [$3]) }
+  | TURNSTYLE formula EOF { ([], [$2]) }
+  | formula TURNSTYLE EOF { ([$1], []) }
   ;
 
 formula:
