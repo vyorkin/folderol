@@ -1,6 +1,8 @@
 open Core
 module ReplParser = Parser
 
+let history_file = Filename.concat (Sys.getenv_exn "HOME") ".folderol_history"
+
 let print_error s =
   Out_channel.eprintf "Error:\n%s\n" s;
   Out_channel.flush stderr
@@ -12,10 +14,12 @@ let prompt () =
       else Printf.sprintf "folderol[%d goal%s]> " n (if n = 1 then "" else "s"))
 
 let prompt_repl () =
-  Out_channel.printf "%s%!" (prompt ());
-  match In_channel.input_line In_channel.stdin with
-  | Some line -> Some (line, ())
+  match LNoise.linenoise (prompt ()) with
   | None -> None
+  | Some line ->
+      if not (String.is_empty (String.strip line)) then
+        LNoise.history_add line |> ignore;
+      Some (line, ())
 
 let file_repl channel =
   match In_channel.input_line channel with
@@ -40,4 +44,11 @@ let process_line line =
   | Error e -> print_error e
   | Ok action -> Action.run action
 
-let run = Sequence.iter ~f:process_line
+let run seq = Sequence.iter seq ~f:process_line
+
+let run_interactive seq =
+  LNoise.history_load ~filename:history_file |> ignore;
+  LNoise.set_multiline false;
+  LNoise.history_set ~max_length:500 |> ignore;
+  run seq;
+  LNoise.history_save ~filename:history_file |> ignore

@@ -1,0 +1,14 @@
+# Classical Tautologies
+# Load with: load examples/classical.lk
+
+# Implication reflexivity
+# P --> P
+
+# Use 'read' to enter formulas interactively:
+#   read P --> P
+#   run
+
+# Or load a sequent:
+#   read |- P --> P
+
+|- P --> P

@@ -22,8 +22,15 @@ val with_goal_table : (Goal_table.t -> 'a) -> 'a
 val get_proof_trees : unit -> Proof_tree.t list
 (** Returns proof trees built during the last completed proof. *)
 
-type proof_step = { goal : Goal.t; rule : Rule.t; solved : Formula.t list }
-(** A single proof step recording what rule was applied and what was solved. *)
+type proof_step = {
+  goal : Goal.t;
+  rule : Rule.t;
+  principal : Goal_entry.t;
+  solved : Formula.t list;
+  num_subgoals : int;
+}
+(** A single proof step recording what rule was applied, the principal formula
+    that was decomposed, and what was solved. *)
 
 val get_proof_trace : unit -> proof_step list
 (** Returns the proof trace (list of steps in order of application). *)
@@ -38,3 +45,10 @@ val get_lemma_cache_hits : unit -> int
 
 val print_proof_trace : unit -> unit
 (** Print the full proof trace showing each step with its rule and result. *)
+
+val build_proof_tree : unit -> Proof_tree.t option
+(** Reconstruct a proof tree from the proof trace. Returns [None] if no trace is
+    available. *)
+
+val print_proof_tree : unit -> unit
+(** Print the proof tree in ASCII format. *)

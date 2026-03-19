@@ -1,0 +1,6 @@
+# Quantifier examples
+
+# Universal implication reflexivity
+# |- FORALL x. (P(x) --> P(x))
+
+|- FORALL x. (P(x) --> P(x))
